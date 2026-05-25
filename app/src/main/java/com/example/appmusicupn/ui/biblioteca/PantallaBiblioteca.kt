@@ -23,6 +23,8 @@ import com.example.appmusicupn.components.BottomMenu
 import com.example.appmusicupn.components.ChipBiblioteca
 import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.models.BibliotecaItemModel
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun PantallaBiblioteca(navController: NavController) {
@@ -38,7 +40,9 @@ fun PantallaBiblioteca(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF121212))
-            .padding(16.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

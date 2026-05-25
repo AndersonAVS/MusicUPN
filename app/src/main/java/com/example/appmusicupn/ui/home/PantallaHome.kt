@@ -29,6 +29,15 @@ import com.example.appmusicupn.components.BottomMenu
 import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.components.RadioCard
 import com.example.appmusicupn.viewmodel.HomeViewModel
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun PantallaHome(
@@ -36,21 +45,48 @@ fun PantallaHome(
     homeViewModel: HomeViewModel = viewModel()
 ) {
     val uiState = homeViewModel.uiState
+    var mostrarMenuCuenta by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF121212))
-            .padding(16.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "A",
-                color = Color.Black,
-                modifier = Modifier
-                    .background(Color(0xFFB39DDB), RoundedCornerShape(50))
-                    .padding(14.dp)
-            )
+            Column {
+                Text(
+                    text = "A",
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFFB39DDB), RoundedCornerShape(50))
+                        .clickable { mostrarMenuCuenta = true }
+                        .padding(14.dp)
+                )
+
+                DropdownMenu(
+                    expanded = mostrarMenuCuenta,
+                    onDismissRequest = { mostrarMenuCuenta = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Configuración de la cuenta") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            // Luego navegaremos a una pantalla de configuración
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Cerrar sesión") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            // Luego conectaremos esto con FirebaseAuth.signOut()
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -71,7 +107,7 @@ fun PantallaHome(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Column(
             modifier = Modifier

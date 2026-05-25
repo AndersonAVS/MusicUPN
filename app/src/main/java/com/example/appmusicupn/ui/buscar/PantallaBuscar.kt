@@ -20,6 +20,8 @@ import androidx.navigation.NavController
 import com.example.appmusicupn.components.BottomMenu
 import com.example.appmusicupn.components.CategoriaCard
 import com.example.appmusicupn.components.MiniPlayer
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun PantallaBuscar(navController: NavController) {
@@ -27,7 +29,9 @@ fun PantallaBuscar(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF121212))
-            .padding(16.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
