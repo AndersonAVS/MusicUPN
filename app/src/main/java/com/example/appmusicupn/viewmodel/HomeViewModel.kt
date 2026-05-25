@@ -8,6 +8,7 @@ import com.example.appmusicupn.data.model.Album
 import com.example.appmusicupn.data.model.RadioStation
 import com.example.appmusicupn.data.repository.MusicRepository
 import com.example.appmusicupn.data.repository.RepositoryProvider
+import com.example.appmusicupn.data.repository.AuthRepository
 
 data class HomeUiState(
     val albumes: List<Album> = emptyList(),
@@ -15,7 +16,8 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-    private val musicRepository: MusicRepository = RepositoryProvider.musicRepository
+    private val musicRepository: MusicRepository = RepositoryProvider.musicRepository,
+    private val authRepository: AuthRepository = RepositoryProvider.authRepository
 ) : ViewModel() {
     var uiState by mutableStateOf(HomeUiState())
         private set
@@ -29,5 +31,8 @@ class HomeViewModel(
             albumes = musicRepository.obtenerAlbumesPopulares(),
             radios = musicRepository.obtenerRadiosPopulares()
         )
+    }
+    fun cerrarSesion() {
+        authRepository.cerrarSesion()
     }
 }

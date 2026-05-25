@@ -12,4 +12,6 @@ interface AuthRepository {
     ): RepositoryResult<Usuario>
 
     suspend fun restablecerPassword(correo: String): RepositoryResult<Unit>
+
+    fun cerrarSesion()
 }

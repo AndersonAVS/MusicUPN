@@ -1,6 +1,7 @@
 package com.example.appmusicupn.ui.buscar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,9 +23,22 @@ import com.example.appmusicupn.components.CategoriaCard
 import com.example.appmusicupn.components.MiniPlayer
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmusicupn.viewmodel.HomeViewModel
 
 @Composable
-fun PantallaBuscar(navController: NavController) {
+fun PantallaBuscar(
+    navController: NavController,
+    homeViewModel: HomeViewModel = viewModel()
+) {
+
+    var mostrarMenuCuenta by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,13 +48,43 @@ fun PantallaBuscar(navController: NavController) {
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "A",
-                color = Color.Black,
-                modifier = Modifier
-                    .background(Color(0xFFB39DDB), RoundedCornerShape(50))
-                    .padding(14.dp)
-            )
+            Column {
+                Text(
+                    text = "A",
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFFB39DDB), RoundedCornerShape(50))
+                        .clickable { mostrarMenuCuenta = true }
+                        .padding(14.dp)
+                )
+
+                DropdownMenu(
+                    expanded = mostrarMenuCuenta,
+                    onDismissRequest = { mostrarMenuCuenta = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Configuración de la cuenta") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            // Luego navegaremos a una pantalla de configuración
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Cerrar sesión") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            homeViewModel.cerrarSesion()
+
+                            navController.navigate("inicio") {
+                                popUpTo("home") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(16.dp))
 

@@ -82,7 +82,13 @@ fun PantallaHome(
                         text = { Text("Cerrar sesión") },
                         onClick = {
                             mostrarMenuCuenta = false
-                            // Luego conectaremos esto con FirebaseAuth.signOut()
+                            homeViewModel.cerrarSesion()
+
+                            navController.navigate("inicio") {
+                                popUpTo("home") {
+                                    inclusive = true
+                                }
+                            }
                         }
                     )
                 }

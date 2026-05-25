@@ -25,9 +25,22 @@ import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.models.BibliotecaItemModel
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmusicupn.viewmodel.HomeViewModel
+
 
 @Composable
-fun PantallaBiblioteca(navController: NavController) {
+fun PantallaBiblioteca(
+    navController: NavController,
+    homeViewModel: HomeViewModel = viewModel())
+{
     val items = listOf(
         BibliotecaItemModel("Tus me gusta", "Playlist • 1605 canciones", "❤", Color(0xFF7C3AED)),
         BibliotecaItemModel("Tus episodios", "Playlist • Episodios guardados", "🔖", Color(0xFF047857)),
@@ -35,6 +48,7 @@ fun PantallaBiblioteca(navController: NavController) {
         BibliotecaItemModel("WORKOUT MUSIC 2026", "Playlist • Magic Records", "⚡", Color(0xFF374151)),
         BibliotecaItemModel("Música Andina", "Playlist • Anderson Vargas Salcedo", "🎵", Color(0xFF92400E))
     )
+    var mostrarMenuCuenta by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -45,13 +59,43 @@ fun PantallaBiblioteca(navController: NavController) {
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "A",
-                color = Color.Black,
-                modifier = Modifier
-                    .background(Color(0xFFB39DDB), RoundedCornerShape(50))
-                    .padding(14.dp)
-            )
+            Column {
+                Text(
+                    text = "A",
+                    color = Color.Black,
+                    modifier = Modifier
+                        .background(Color(0xFFB39DDB), RoundedCornerShape(50))
+                        .clickable { mostrarMenuCuenta = true }
+                        .padding(14.dp)
+                )
+
+                DropdownMenu(
+                    expanded = mostrarMenuCuenta,
+                    onDismissRequest = { mostrarMenuCuenta = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Configuración de la cuenta") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            // Luego navegaremos a una pantalla de configuración
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Cerrar sesión") },
+                        onClick = {
+                            mostrarMenuCuenta = false
+                            homeViewModel.cerrarSesion()
+
+                            navController.navigate("inicio") {
+                                popUpTo("home") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(16.dp))
 

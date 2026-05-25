@@ -93,5 +93,8 @@ class FirebaseAuthRepository(
             RepositoryResult.Error("No pudimos enviar el correo de recuperación")
         }
     }
+    override fun cerrarSesion() {
+        firebaseAuth.signOut()
+    }
 
 }

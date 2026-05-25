@@ -69,4 +69,7 @@ class InMemoryAuthRepository : AuthRepository {
             RepositoryResult.Error("No encontramos una cuenta con ese correo")
         }
     }
+    override fun cerrarSesion() {
+        // No hay sesión real que cerrar en memoria
+    }
 }
