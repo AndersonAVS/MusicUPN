@@ -17,7 +17,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
 @Composable
-fun BottomMenu(navController: NavController, pantallaActual: String) {
+fun BottomMenu( navController: NavController,
+                pantallaActual: String,
+                onCrearPlaylist: () -> Unit = {})
+{
     var mostrarCrear by remember { mutableStateOf(false) }
 
     Row(
@@ -43,7 +46,11 @@ fun BottomMenu(navController: NavController, pantallaActual: String) {
 
     CrearBottomSheet(
         mostrar = mostrarCrear,
-        onCerrar = { mostrarCrear = false }
+        onCerrar = { mostrarCrear = false },
+        onCrearPlaylist = {
+            mostrarCrear = false
+            onCrearPlaylist()
+        }
     )
 }
 

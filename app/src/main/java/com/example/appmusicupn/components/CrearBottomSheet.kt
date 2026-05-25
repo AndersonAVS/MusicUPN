@@ -1,6 +1,7 @@
 package com.example.appmusicupn.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,9 +18,11 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun CrearBottomSheet(
     mostrar: Boolean,
-    onCerrar: () -> Unit
+    onCerrar: () -> Unit,
+    onCrearPlaylist: () -> Unit
 ) {
     if (mostrar) {
         ModalBottomSheet(
@@ -44,7 +47,8 @@ fun CrearBottomSheet(
                 OpcionCrear(
                     icono = "♫",
                     titulo = "Playlist",
-                    descripcion = "Crea una playlist con canciones o episodios"
+                    descripcion = "Crea una playlist con canciones o episodios",
+                    onClick = onCrearPlaylist
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -68,15 +72,16 @@ fun CrearBottomSheet(
         }
     }
 }
-
 @Composable
 fun OpcionCrear(
     icono: String,
     titulo: String,
-    descripcion: String
+    descripcion: String,
+    onClick: () -> Unit = {}
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -103,4 +108,5 @@ fun OpcionCrear(
         }
     }
 }
+
 
