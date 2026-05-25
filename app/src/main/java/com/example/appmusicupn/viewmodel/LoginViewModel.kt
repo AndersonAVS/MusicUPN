@@ -9,6 +9,9 @@ import com.example.appmusicupn.data.repository.AuthRepository
 import com.example.appmusicupn.data.repository.RepositoryProvider
 import com.example.appmusicupn.data.repository.RepositoryResult
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+
 data class LoginUiState(
     val correo: String = "",
     val password: String = "",
@@ -40,17 +43,19 @@ class LoginViewModel(
             return
         }
 
-        when (val result = authRepository.login(correo, password)) {
-            is RepositoryResult.Success -> {
-                uiState = uiState.copy(
-                    error = "",
-                    loginExitoso = true,
-                    rol = result.data.rol
-                )
-            }
+        viewModelScope.launch {
+            when (val result = authRepository.login(correo, password)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        error = "",
+                        loginExitoso = true,
+                        rol = result.data.rol
+                    )
+                }
 
-            is RepositoryResult.Error -> {
-                uiState = uiState.copy(error = result.message)
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(error = result.message)
+                }
             }
         }
     }

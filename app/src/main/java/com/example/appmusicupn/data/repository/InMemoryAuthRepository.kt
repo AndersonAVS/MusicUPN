@@ -24,7 +24,7 @@ class InMemoryAuthRepository : AuthRepository {
         "admin" to "1234"
     )
 
-    override fun login(correo: String, password: String): RepositoryResult<Usuario> {
+    override suspend fun login(correo: String, password: String): RepositoryResult<Usuario> {
         val key = correo.trim()
         val usuario = usuarios[key]
         val savedPassword = passwords[key]
@@ -36,7 +36,7 @@ class InMemoryAuthRepository : AuthRepository {
         }
     }
 
-    override fun registrar(
+    override suspend fun registrar(
         nombre: String,
         correo: String,
         password: String

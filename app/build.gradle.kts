@@ -41,8 +41,11 @@ android {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.11.0")
     implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
     implementation("com.google.firebase:firebase-auth")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")

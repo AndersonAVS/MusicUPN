@@ -8,6 +8,9 @@ import com.example.appmusicupn.data.repository.AuthRepository
 import com.example.appmusicupn.data.repository.RepositoryProvider
 import com.example.appmusicupn.data.repository.RepositoryResult
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+
 data class RegistroUiState(
     val nombre: String = "",
     val correo: String = "",
@@ -46,23 +49,24 @@ class RegistroViewModel(
             return
         }
 
-        when (
-            val result = authRepository.registrar(
-                nombre = uiState.nombre,
-                correo = uiState.correo,
-                password = uiState.password
-            )
-        ) {
-            is RepositoryResult.Success -> {
-                uiState = uiState.copy(mensajeError = "", registroExitoso = true)
-            }
+        viewModelScope.launch {
+            when (
+                val result = authRepository.registrar(
+                    nombre = uiState.nombre,
+                    correo = uiState.correo,
+                    password = uiState.password
+                )
+            ) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(mensajeError = "", registroExitoso = true)
+                }
 
-            is RepositoryResult.Error -> {
-                uiState = uiState.copy(mensajeError = result.message)
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(mensajeError = result.message)
+                }
             }
         }
     }
-
     private fun validarCampos(): String? = when {
         uiState.nombre.isBlank() -> "Ingrese su nombre completo"
         uiState.correo.isBlank() -> "Ingrese su correo electrónico"
