@@ -19,6 +19,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.appmusicupn.data.model.UserRole
 import com.example.appmusicupn.viewmodel.LoginViewModel
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun PantallaLogin(
@@ -69,6 +71,15 @@ fun PantallaLogin(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextButton(
+            onClick = loginViewModel::restablecerPassword,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("¿Olvidaste tu contraseña?")
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
@@ -81,6 +92,11 @@ fun PantallaLogin(
         if (uiState.error.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(uiState.error, color = MaterialTheme.colorScheme.error)
+        }
+
+        if (uiState.mensaje.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(uiState.mensaje, color = Color(0xFF2E7D32))
         }
     }
 }

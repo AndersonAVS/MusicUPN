@@ -17,7 +17,9 @@ data class LoginUiState(
     val password: String = "",
     val error: String = "",
     val loginExitoso: Boolean = false,
+    val mensaje: String = "",
     val rol: UserRole? = null
+
 )
 
 class LoginViewModel(
@@ -27,11 +29,11 @@ class LoginViewModel(
         private set
 
     fun onCorreoChange(value: String) {
-        uiState = uiState.copy(correo = value, error = "")
+        uiState = uiState.copy(correo = value, error = "", mensaje = "")
     }
 
     fun onPasswordChange(value: String) {
-        uiState = uiState.copy(password = value, error = "")
+        uiState = uiState.copy(password = value, error = "", mensaje = "")
     }
 
     fun login() {
@@ -59,4 +61,34 @@ class LoginViewModel(
             }
         }
     }
+    fun restablecerPassword() {
+        val correo = uiState.correo.trim()
+
+        if (correo.isBlank()) {
+            uiState = uiState.copy(
+                error = "Ingresa tu correo para restablecer tu contraseña",
+                mensaje = ""
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            when (val result = authRepository.restablecerPassword(correo)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        error = "",
+                        mensaje = "Te enviamos un correo para restablecer tu contraseña"
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        error = result.message,
+                        mensaje = ""
+                    )
+                }
+            }
+        }
+    }
+
 }

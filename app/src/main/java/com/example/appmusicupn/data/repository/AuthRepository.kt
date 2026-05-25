@@ -10,4 +10,6 @@ interface AuthRepository {
         correo: String,
         password: String
     ): RepositoryResult<Usuario>
+
+    suspend fun restablecerPassword(correo: String): RepositoryResult<Unit>
 }

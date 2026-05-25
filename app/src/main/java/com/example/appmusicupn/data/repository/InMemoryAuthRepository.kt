@@ -59,4 +59,14 @@ class InMemoryAuthRepository : AuthRepository {
 
         return RepositoryResult.Success(usuario)
     }
+
+    override suspend fun restablecerPassword(correo: String): RepositoryResult<Unit> {
+        val key = correo.trim()
+
+        return if (usuarios.containsKey(key)) {
+            RepositoryResult.Success(Unit)
+        } else {
+            RepositoryResult.Error("No encontramos una cuenta con ese correo")
+        }
+    }
 }

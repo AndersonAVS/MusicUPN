@@ -75,4 +75,23 @@ class FirebaseAuthRepository(
             )
         }
     }
+
+    override suspend fun restablecerPassword(correo: String): RepositoryResult<Unit> {
+        val correoLimpio = correo.trim()
+
+        if (correoLimpio.isBlank()) {
+            return RepositoryResult.Error("Ingresa tu correo para restablecer tu contraseña")
+        }
+
+        return try {
+            firebaseAuth
+                .sendPasswordResetEmail(correoLimpio)
+                .await()
+
+            RepositoryResult.Success(Unit)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No pudimos enviar el correo de recuperación")
+        }
+    }
+
 }
