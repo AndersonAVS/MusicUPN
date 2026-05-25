@@ -7,9 +7,12 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.example.appmusicupn.data.model.UsuarioPerfil
+import com.google.firebase.firestore.FirebaseFirestore
 
 class FirebaseAuthRepository(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : AuthRepository {
 
     override suspend fun login(
@@ -61,6 +64,21 @@ class FirebaseAuthRepository(
                 .build()
 
             firebaseUser.updateProfile(profileUpdates).await()//guarda el nombre en el perfil basico de firebase auth
+
+            val perfil = UsuarioPerfil(
+                uid = firebaseUser.uid,
+                nombre = nombre.trim(),
+                correo = firebaseUser.email ?: correo.trim(),
+                fotoPerfil = "",
+                fechaRegistro = System.currentTimeMillis(),
+                rol = "usuario"
+            )
+
+            firestore
+                .collection("usuarios")
+                .document(firebaseUser.uid)
+                .set(perfil)
+                .await()
 
             val usuario = Usuario(
                 id = firebaseUser.uid,
