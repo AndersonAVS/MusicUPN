@@ -77,7 +77,7 @@ fun PantallaBiblioteca(
                         text = { Text("Configuración de la cuenta") },
                         onClick = {
                             mostrarMenuCuenta = false
-                            // Luego navegaremos a una pantalla de configuración
+                            navController.navigate("configuracion_cuenta")
                         }
                     )
 
