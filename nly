@@ -1,0 +1,411 @@
+warning: in the working copy of 'app/src/main/java/com/example/appmusicupn/data/repository/InMemoryMusicRepository.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/example/appmusicupn/data/repository/MusicRepository.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/example/appmusicupn/ui/biblioteca/PantallaBiblioteca.kt', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/components/BibliotecaComponents.kt b/app/src/main/java/com/example/appmusicupn/components/BibliotecaComponents.kt[m
+[1mindex 302e14c..7731279 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/components/BibliotecaComponents.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/components/BibliotecaComponents.kt[m
+[36m@@ -10,6 +10,7 @@[m [mimport androidx.compose.ui.Modifier[m
+ import androidx.compose.ui.graphics.Color[m
+ import androidx.compose.ui.text.font.FontWeight[m
+ import androidx.compose.ui.unit.dp[m
+[32m+[m[32mimport androidx.compose.foundation.clickable[m
+ [m
+ @Composable[m
+ fun ChipBiblioteca(texto: String) {[m
+[36m@@ -28,13 +29,18 @@[m [mfun BibliotecaItem([m
+     titulo: String,[m
+     descripcion: String,[m
+     icono: String,[m
+[31m-    color: Color[m
+[32m+[m[32m    color: Color,[m
+[32m+[m[32m    onClick: () -> Unit = {},[m
+[32m+[m
+[32m+[m
+ ) {[m
+[32m+[m
+     Row([m
+[32m+[m[32m        verticalAlignment = Alignment.CenterVertically,[m
+         modifier = Modifier[m
+             .fillMaxWidth()[m
+[31m-            .padding(vertical = 10.dp),[m
+[31m-        verticalAlignment = Alignment.CenterVertically[m
+[32m+[m[32m            .padding(vertical = 10.dp)[m
+[32m+[m[32m            .clickable { onClick() }[m
+     ) {[m
+         Box([m
+             modifier = Modifier[m
+[36m@@ -53,4 +59,4 @@[m [mfun BibliotecaItem([m
+             Text(descripcion, color = Color.Gray)[m
+         }[m
+     }[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/components/CrearBottomSheet.kt b/app/src/main/java/com/example/appmusicupn/components/CrearBottomSheet.kt[m
+[1mindex a9c6d67..67fe5c7 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/components/CrearBottomSheet.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/components/CrearBottomSheet.kt[m
+[36m@@ -2,7 +2,15 @@[m [mpackage com.example.appmusicupn.components[m
+ [m
+ import androidx.compose.foundation.background[m
+ import androidx.compose.foundation.clickable[m
+[31m-import androidx.compose.foundation.layout.*[m
+[32m+[m[32mimport androidx.compose.foundation.layout.Column[m
+[32m+[m[32mimport androidx.compose.foundation.layout.Row[m
+[32m+[m[32mimport androidx.compose.foundation.layout.Spacer[m
+[32m+[m[32mimport androidx.compose.foundation.layout.Box[m
+[32m+[m[32mimport androidx.compose.foundation.layout.fillMaxWidth[m
+[32m+[m[32mimport androidx.compose.foundation.layout.height[m
+[32m+[m[32mimport androidx.compose.foundation.layout.padding[m
+[32m+[m[32mimport androidx.compose.foundation.layout.size[m
+[32m+[m[32mimport androidx.compose.foundation.layout.width[m
+ import androidx.compose.foundation.shape.CircleShape[m
+ import androidx.compose.foundation.shape.RoundedCornerShape[m
+ import androidx.compose.material3.ExperimentalMaterial3Api[m
+[36m@@ -18,7 +26,6 @@[m [mimport androidx.compose.ui.unit.dp[m
+ [m
+ @OptIn(ExperimentalMaterial3Api::class)[m
+ @Composable[m
+[31m-[m
+ fun CrearBottomSheet([m
+     mostrar: Boolean,[m
+     onCerrar: () -> Unit,[m
+[36m@@ -72,6 +79,7 @@[m [mfun CrearBottomSheet([m
+         }[m
+     }[m
+ }[m
+[32m+[m
+ @Composable[m
+ fun OpcionCrear([m
+     icono: String,[m
+[36m@@ -108,5 +116,3 @@[m [mfun OpcionCrear([m
+         }[m
+     }[m
+ }[m
+[31m-[m
+[31m-[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/data/repository/FirebaseMusicRepository.kt b/app/src/main/java/com/example/appmusicupn/data/repository/FirebaseMusicRepository.kt[m
+[1mindex 0f77066..0515bee 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/data/repository/FirebaseMusicRepository.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/data/repository/FirebaseMusicRepository.kt[m
+[36m@@ -78,4 +78,33 @@[m [mclass FirebaseMusicRepository([m
+             RepositoryResult.Error("No se pudieron cargar tus playlists")[m
+         }[m
+     }[m
+[32m+[m
+[32m+[m[32m    override suspend fun actualizarPlaylist([m
+[32m+[m[32m        playlist: Playlist[m
+[32m+[m[32m    ): RepositoryResult<Playlist> {[m
+[32m+[m[32m        val usuario = firebaseAuth.currentUser[m
+[32m+[m[32m            ?: return RepositoryResult.Error("No hay una sesión activa")[m
+[32m+[m
+[32m+[m[32m        if (playlist.id.isBlank()) {[m
+[32m+[m[32m            return RepositoryResult.Error("Playlist inválida")[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if (playlist.nombre.trim().isBlank()) {[m
+[32m+[m[32m            return RepositoryResult.Error("El nombre no puede estar vacío")[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        return try {[m
+[32m+[m[32m            firestore[m
+[32m+[m[32m                .collection("usuarios")[m
+[32m+[m[32m                .document(usuario.uid)[m
+[32m+[m[32m                .collection("playlists")[m
+[32m+[m[32m                .document(playlist.id)[m
+[32m+[m[32m                .set(playlist)[m
+[32m+[m[32m                .await()[m
+[32m+[m
+[32m+[m[32m            RepositoryResult.Success(playlist)[m
+[32m+[m[32m        } catch (exception: Exception) {[m
+[32m+[m[32m            RepositoryResult.Error("No se pudo actualizar la playlist")[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+ }[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/data/repository/InMemoryMusicRepository.kt b/app/src/main/java/com/example/appmusicupn/data/repository/InMemoryMusicRepository.kt[m
+[1mindex 8a23aec..9ba8f13 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/data/repository/InMemoryMusicRepository.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/data/repository/InMemoryMusicRepository.kt[m
+[36m@@ -21,27 +21,44 @@[m [mclass InMemoryMusicRepository : MusicRepository {[m
+     )[m
+ [m
+ [m
+[31m-    override suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist> {[m
+[32m+[m[32m    override suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist>[m
+[32m+[m[32m    {[m
+         val nombreLimpio = nombre.trim()[m
+ [m
+[31m-    if (nombreLimpio.isBlank()) {[m
+[31m-        return RepositoryResult.Error("Ingresa un nombre para la playlist")[m
+[32m+[m[32m        if (nombreLimpio.isBlank()) {[m
+[32m+[m[32m            return RepositoryResult.Error("Ingresa un nombre para la playlist")[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        val playlist = Playlist([m
+[32m+[m[32m            id = "playlist-${playlists.size + 1}",[m
+[32m+[m[32m            nombre = nombreLimpio,[m
+[32m+[m[32m            descripcion = "Playlist creada por ti",[m
+[32m+[m[32m            fechaCreacion = System.currentTimeMillis(),[m
+[32m+[m[32m            cancionesIds = emptyList()[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        playlists.add(playlist)[m
+[32m+[m
+[32m+[m[32m        return RepositoryResult.Success(playlist)[m
+[32m+[m
+[32m+[m
+     }[m
+ [m
+[31m-    val playlist = Playlist([m
+[31m-        id = "playlist-${playlists.size + 1}",[m
+[31m-        nombre = nombreLimpio,[m
+[31m-        descripcion = "Playlist creada por ti",[m
+[31m-        fechaCreacion = System.currentTimeMillis(),[m
+[31m-        cancionesIds = emptyList()[m
+[31m-    )[m
+[32m+[m[32m    override suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>> {[m
+[32m+[m[32m        return RepositoryResult.Success(playlists)[m
+[32m+[m[32m    }[m
+ [m
+[31m-    playlists.add(playlist)[m
+[32m+[m[32m    override suspend fun actualizarPlaylist([m
+[32m+[m[32m        playlist: Playlist[m
+[32m+[m[32m    ): RepositoryResult<Playlist> {[m
+[32m+[m[32m        val index = playlists.indexOfFirst { it.id == playlist.id }[m
+ [m
+[31m-    return RepositoryResult.Success(playlist)[m
+[31m-}[m
+[32m+[m[32m        if (index == -1) {[m
+[32m+[m[32m            return RepositoryResult.Error("No se encontró la playlist")[m
+[32m+[m[32m        }[m
+ [m
+[31m-override suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>> {[m
+[31m-    return RepositoryResult.Success(playlists)[m
+[31m-}[m
+[32m+[m[32m        playlists[index] = playlist[m
+[32m+[m
+[32m+[m[32m        return RepositoryResult.Success(playlist)[m
+[32m+[m[32m    }[m
+ }[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/data/repository/MusicRepository.kt b/app/src/main/java/com/example/appmusicupn/data/repository/MusicRepository.kt[m
+[1mindex 3688ef2..ed8cc4d 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/data/repository/MusicRepository.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/data/repository/MusicRepository.kt[m
+[36m@@ -14,4 +14,6 @@[m [minterface MusicRepository {[m
+     suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist>[m
+ [m
+     suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>>[m
+[32m+[m
+[32m+[m[32m    suspend fun actualizarPlaylist(playlist: Playlist): RepositoryResult<Playlist>[m
+ }[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/ui/biblioteca/PantallaBiblioteca.kt b/app/src/main/java/com/example/appmusicupn/ui/biblioteca/PantallaBiblioteca.kt[m
+[1mindex f7b12c7..4e784ea 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/ui/biblioteca/PantallaBiblioteca.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/ui/biblioteca/PantallaBiblioteca.kt[m
+[36m@@ -7,7 +7,6 @@[m [mimport androidx.compose.foundation.layout.Column[m
+ import androidx.compose.foundation.layout.Row[m
+ import androidx.compose.foundation.layout.Spacer[m
+ import androidx.compose.foundation.layout.fillMaxSize[m
+[31m-import androidx.compose.foundation.layout.fillMaxWidth[m
+ import androidx.compose.foundation.layout.height[m
+ import androidx.compose.foundation.layout.navigationBarsPadding[m
+ import androidx.compose.foundation.layout.padding[m
+[36m@@ -79,7 +78,7 @@[m [mfun PantallaBiblioteca([m
+                     onDismissRequest = { mostrarMenuCuenta = false }[m
+                 ) {[m
+                     DropdownMenuItem([m
+[31m-                        text = { Text("Configuración de la cuenta") },[m
+[32m+[m[32m                        text = { Text("Configuracion de la cuenta") },[m
+                         onClick = {[m
+                             mostrarMenuCuenta = false[m
+                             navController.navigate("configuracion_cuenta")[m
+[36m@@ -87,7 +86,7 @@[m [mfun PantallaBiblioteca([m
+                     )[m
+ [m
+                     DropdownMenuItem([m
+[31m-                        text = { Text("Cerrar sesión") },[m
+[32m+[m[32m                        text = { Text("Cerrar sesion") },[m
+                         onClick = {[m
+                             mostrarMenuCuenta = false[m
+                             homeViewModel.cerrarSesion()[m
+[36m@@ -122,7 +121,7 @@[m [mfun PantallaBiblioteca([m
+         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {[m
+             ChipBiblioteca("Playlists")[m
+             ChipBiblioteca("Podcasts")[m
+[31m-            ChipBiblioteca("Álbumes")[m
+[32m+[m[32m            ChipBiblioteca("Albumes")[m
+             ChipBiblioteca("Artistas")[m
+         }[m
+ [m
+[36m@@ -138,7 +137,7 @@[m [mfun PantallaBiblioteca([m
+ [m
+         if (bibliotecaState.playlists.isEmpty()) {[m
+             Text([m
+[31m-                text = "Aún no tienes playlists creadas",[m
+[32m+[m[32m                text = "Aun no tienes playlists creadas",[m
+                 color = Color.Gray[m
+             )[m
+         } else {[m
+[36m@@ -147,7 +146,10 @@[m [mfun PantallaBiblioteca([m
+                     titulo = playlist.nombre,[m
+                     descripcion = playlist.descripcion,[m
+                     icono = "♫",[m
+[31m-                    color = Color(0xFF374151)[m
+[32m+[m[32m                    color = Color(0xFF374151),[m
+[32m+[m[32m                    onClick = {[m
+[32m+[m[32m                        bibliotecaViewModel.seleccionarPlaylistParaEditar(playlist)[m
+[32m+[m[32m                    }[m
+                 )[m
+             }[m
+         }[m
+[36m@@ -212,4 +214,50 @@[m [mfun PantallaBiblioteca([m
+             }[m
+         )[m
+     }[m
+[32m+[m
+[32m+[m[32m    if (bibliotecaState.playlistEditando != null) {[m
+[32m+[m[32m        AlertDialog([m
+[32m+[m[32m            onDismissRequest = {[m
+[32m+[m[32m                bibliotecaViewModel.cancelarEdicionPlaylist()[m
+[32m+[m[32m            },[m
+[32m+[m[32m            title = { Text("Editar playlist") },[m
+[32m+[m[32m            text = {[m
+[32m+[m[32m                Column {[m
+[32m+[m[32m                    OutlinedTextField([m
+[32m+[m[32m                        value = bibliotecaState.nombreEditando,[m
+[32m+[m[32m                        onValueChange = bibliotecaViewModel::onNombreEditandoChange,[m
+[32m+[m[32m                        label = { Text("Nombre") },[m
+[32m+[m[32m                        singleLine = true[m
+[32m+[m[32m                    )[m
+[32m+[m
+[32m+[m[32m                    Spacer(modifier = Modifier.height(12.dp))[m
+[32m+[m
+[32m+[m[32m                    OutlinedTextField([m
+[32m+[m[32m                        value = bibliotecaState.descripcionEditando,[m
+[32m+[m[32m                        onValueChange = bibliotecaViewModel::onDescripcionEditandoChange,[m
+[32m+[m[32m                        label = { Text("Descripcion") },[m
+[32m+[m[32m                        singleLine = true[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                }[m
+[32m+[m[32m            },[m
+[32m+[m[32m            confirmButton = {[m
+[32m+[m[32m                TextButton([m
+[32m+[m[32m                    onClick = {[m
+[32m+[m[32m                        bibliotecaViewModel.guardarEdicionPlaylist()[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                ) {[m
+[32m+[m[32m                    Text("Guardar")[m
+[32m+[m[32m                }[m
+[32m+[m[32m            },[m
+[32m+[m[32m            dismissButton = {[m
+[32m+[m[32m                TextButton([m
+[32m+[m[32m                    onClick = {[m
+[32m+[m[32m                        bibliotecaViewModel.cancelarEdicionPlaylist()[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                ) {[m
+[32m+[m[32m                    Text("Cancelar")[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        )[m
+[32m+[m[32m    }[m
+ }[m
+[1mdiff --git a/app/src/main/java/com/example/appmusicupn/viewmodel/BibliotecaViewModel.kt b/app/src/main/java/com/example/appmusicupn/viewmodel/BibliotecaViewModel.kt[m
+[1mindex 8248018..5261b5c 100644[m
+[1m--- a/app/src/main/java/com/example/appmusicupn/viewmodel/BibliotecaViewModel.kt[m
+[1m+++ b/app/src/main/java/com/example/appmusicupn/viewmodel/BibliotecaViewModel.kt[m
+[36m@@ -16,7 +16,10 @@[m [mdata class BibliotecaUiState([m
+     val nombreNuevaPlaylist: String = "",[m
+     val error: String = "",[m
+     val mensaje: String = "",[m
+[31m-    val cargando: Boolean = false[m
+[32m+[m[32m    val cargando: Boolean = false,[m
+[32m+[m[32m    val playlistEditando: Playlist? = null,[m
+[32m+[m[32m    val nombreEditando: String = "",[m
+[32m+[m[32m    val descripcionEditando: String = "",[m
+ )[m
+ [m
+ class BibliotecaViewModel([m
+[36m@@ -89,5 +92,82 @@[m [mclass BibliotecaViewModel([m
+             }[m
+         }[m
+     }[m
+[32m+[m
+[32m+[m[32m    fun seleccionarPlaylistParaEditar(playlist: Playlist) {[m
+[32m+[m[32m        uiState = uiState.copy([m
+[32m+[m[32m            playlistEditando = playlist,[m
+[32m+[m[32m            nombreEditando = playlist.nombre,[m
+[32m+[m[32m            descripcionEditando = playlist.descripcion,[m
+[32m+[m[32m            error = "",[m
+[32m+[m[32m            mensaje = ""[m
+[32m+[m[32m        )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    fun cancelarEdicionPlaylist() {[m
+[32m+[m[32m        uiState = uiState.copy([m
+[32m+[m[32m            playlistEditando = null,[m
+[32m+[m[32m            nombreEditando = "",[m
+[32m+[m[32m            descripcionEditando = "",[m
+[32m+[m[32m            error = "",[m
+[32m+[m[32m            mensaje = ""[m
+[32m+[m[32m        )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    fun onNombreEditandoChange(value: String) {[m
+[32m+[m[32m        uiState = uiState.copy([m
+[32m+[m[32m            nombreEditando = value,[m
+[32m+[m[32m            error = "",[m
+[32m+[m[32m            mensaje = ""[m
+[32m+[m[32m        )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    fun onDescripcionEditandoChange(value: String) {[m
+[32m+[m[32m        uiState = uiState.copy([m
+[32m+[m[32m            descripcionEditando = value,[m
+[32m+[m[32m            error = "",[m
+[32m+[m[32m            mensaje = ""[m
+[32m+[m[32m        )[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    fun guardarEdicionPlaylist() {[m
+[32m+[m[32m        val playlistActual = uiState.playlistEditando ?: return[m
+[32m+[m[32m        val nombre = uiState.nombreEditando.trim()[m
+[32m+[m[32m        val descripcion = uiState.descripcionEditando.trim()[m
+[32m+[m
+[32m+[m[32m        if (nombre.isBlank()) {[m
+[32m+[m[32m            uiState = uiState.copy(error = "El nombre no puede estar vacío")[m
+[32m+[m[32m            return[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        val playlistActualizada = playlistActual.copy([m
+[32m+[m[32m            nombre = nombre,[m
+[32m+[m[32m            descripcion = descripcion.ifBlank { "Playlist creada por ti" }[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        viewModelScope.launch {[m
+[32m+[m[32m            when (val result = musicRepository.actualizarPlaylist(playlistActualizada)) {[m
+[32m+[m[32m                is RepositoryResult.Success -> {[m
+[32m+[m[32m                    uiState = uiState.copy([m
+[32m+[m[32m                        playlists = uiState.playlists.map { playlist ->[m
+[32m+[m[32m                            if (playlist.id == result.data.id) result.data else playlist[m
+[32m+[m[32m                        },[m
+[32m+[m[32m                        playlistEditando = null,[m
+[32m+[m[32m                        nombreEditando = "",[m
+[32m+[m[32m                        descripcionEditando = "",[m
+[32m+[m[32m                        error = "",[m
+[32m+[m[32m                        mensaje = "Playlist actualizada correctamente"[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                is RepositoryResult.Error -> {[m
+[32m+[m[32m                    uiState = uiState.copy([m
+[32m+[m[32m                        error = result.message,[m
+[32m+[m[32m                        mensaje = ""[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+ }[m
+ [m

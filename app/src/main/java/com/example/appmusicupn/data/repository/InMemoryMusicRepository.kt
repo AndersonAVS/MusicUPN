@@ -21,27 +21,44 @@ class InMemoryMusicRepository : MusicRepository {
     )
 
 
-    override suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist> {
+    override suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist>
+    {
         val nombreLimpio = nombre.trim()
 
-    if (nombreLimpio.isBlank()) {
-        return RepositoryResult.Error("Ingresa un nombre para la playlist")
+        if (nombreLimpio.isBlank()) {
+            return RepositoryResult.Error("Ingresa un nombre para la playlist")
+        }
+
+        val playlist = Playlist(
+            id = "playlist-${playlists.size + 1}",
+            nombre = nombreLimpio,
+            descripcion = "Playlist creada por ti",
+            fechaCreacion = System.currentTimeMillis(),
+            cancionesIds = emptyList()
+        )
+
+        playlists.add(playlist)
+
+        return RepositoryResult.Success(playlist)
+
+
     }
 
-    val playlist = Playlist(
-        id = "playlist-${playlists.size + 1}",
-        nombre = nombreLimpio,
-        descripcion = "Playlist creada por ti",
-        fechaCreacion = System.currentTimeMillis(),
-        cancionesIds = emptyList()
-    )
+    override suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>> {
+        return RepositoryResult.Success(playlists)
+    }
 
-    playlists.add(playlist)
+    override suspend fun actualizarPlaylist(
+        playlist: Playlist
+    ): RepositoryResult<Playlist> {
+        val index = playlists.indexOfFirst { it.id == playlist.id }
 
-    return RepositoryResult.Success(playlist)
-}
+        if (index == -1) {
+            return RepositoryResult.Error("No se encontró la playlist")
+        }
 
-override suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>> {
-    return RepositoryResult.Success(playlists)
-}
+        playlists[index] = playlist
+
+        return RepositoryResult.Success(playlist)
+    }
 }

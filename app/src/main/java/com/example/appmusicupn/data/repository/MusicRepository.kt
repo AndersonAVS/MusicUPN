@@ -14,4 +14,6 @@ interface MusicRepository {
     suspend fun crearPlaylist(nombre: String): RepositoryResult<Playlist>
 
     suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>>
+
+    suspend fun actualizarPlaylist(playlist: Playlist): RepositoryResult<Playlist>
 }

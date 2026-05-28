@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 
 @Composable
 fun ChipBiblioteca(texto: String) {
@@ -28,13 +29,18 @@ fun BibliotecaItem(
     titulo: String,
     descripcion: String,
     icono: String,
-    color: Color
+    color: Color,
+    onClick: () -> Unit = {},
+
+
 ) {
+
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 10.dp)
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier

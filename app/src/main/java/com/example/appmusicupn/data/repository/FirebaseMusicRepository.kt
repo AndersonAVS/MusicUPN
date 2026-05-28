@@ -78,4 +78,33 @@ class FirebaseMusicRepository(
             RepositoryResult.Error("No se pudieron cargar tus playlists")
         }
     }
+
+    override suspend fun actualizarPlaylist(
+        playlist: Playlist
+    ): RepositoryResult<Playlist> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (playlist.id.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        if (playlist.nombre.trim().isBlank()) {
+            return RepositoryResult.Error("El nombre no puede estar vacío")
+        }
+
+        return try {
+            firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("playlists")
+                .document(playlist.id)
+                .set(playlist)
+                .await()
+
+            RepositoryResult.Success(playlist)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo actualizar la playlist")
+        }
+    }
 }

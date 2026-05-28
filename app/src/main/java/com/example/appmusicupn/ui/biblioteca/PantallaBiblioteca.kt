@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -79,7 +78,7 @@ fun PantallaBiblioteca(
                     onDismissRequest = { mostrarMenuCuenta = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Configuración de la cuenta") },
+                        text = { Text("Configuracion de la cuenta") },
                         onClick = {
                             mostrarMenuCuenta = false
                             navController.navigate("configuracion_cuenta")
@@ -87,7 +86,7 @@ fun PantallaBiblioteca(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Cerrar sesión") },
+                        text = { Text("Cerrar sesion") },
                         onClick = {
                             mostrarMenuCuenta = false
                             homeViewModel.cerrarSesion()
@@ -122,7 +121,7 @@ fun PantallaBiblioteca(
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
             ChipBiblioteca("Playlists")
             ChipBiblioteca("Podcasts")
-            ChipBiblioteca("Álbumes")
+            ChipBiblioteca("Albumes")
             ChipBiblioteca("Artistas")
         }
 
@@ -138,7 +137,7 @@ fun PantallaBiblioteca(
 
         if (bibliotecaState.playlists.isEmpty()) {
             Text(
-                text = "Aún no tienes playlists creadas",
+                text = "Aun no tienes playlists creadas",
                 color = Color.Gray
             )
         } else {
@@ -147,7 +146,10 @@ fun PantallaBiblioteca(
                     titulo = playlist.nombre,
                     descripcion = playlist.descripcion,
                     icono = "♫",
-                    color = Color(0xFF374151)
+                    color = Color(0xFF374151),
+                    onClick = {
+                        bibliotecaViewModel.seleccionarPlaylistParaEditar(playlist)
+                    }
                 )
             }
         }
@@ -207,6 +209,52 @@ fun PantallaBiblioteca(
             },
             dismissButton = {
                 TextButton(onClick = { mostrarDialogCrearPlaylist = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (bibliotecaState.playlistEditando != null) {
+        AlertDialog(
+            onDismissRequest = {
+                bibliotecaViewModel.cancelarEdicionPlaylist()
+            },
+            title = { Text("Editar playlist") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = bibliotecaState.nombreEditando,
+                        onValueChange = bibliotecaViewModel::onNombreEditandoChange,
+                        label = { Text("Nombre") },
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = bibliotecaState.descripcionEditando,
+                        onValueChange = bibliotecaViewModel::onDescripcionEditandoChange,
+                        label = { Text("Descripcion") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        bibliotecaViewModel.guardarEdicionPlaylist()
+                    }
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        bibliotecaViewModel.cancelarEdicionPlaylist()
+                    }
+                ) {
                     Text("Cancelar")
                 }
             }

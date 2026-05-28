@@ -16,7 +16,10 @@ data class BibliotecaUiState(
     val nombreNuevaPlaylist: String = "",
     val error: String = "",
     val mensaje: String = "",
-    val cargando: Boolean = false
+    val cargando: Boolean = false,
+    val playlistEditando: Playlist? = null,
+    val nombreEditando: String = "",
+    val descripcionEditando: String = "",
 )
 
 class BibliotecaViewModel(
@@ -77,6 +80,83 @@ class BibliotecaViewModel(
                         nombreNuevaPlaylist = "",
                         mensaje = "Playlist creada correctamente",
                         error = ""
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        error = result.message,
+                        mensaje = ""
+                    )
+                }
+            }
+        }
+    }
+
+    fun seleccionarPlaylistParaEditar(playlist: Playlist) {
+        uiState = uiState.copy(
+            playlistEditando = playlist,
+            nombreEditando = playlist.nombre,
+            descripcionEditando = playlist.descripcion,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun cancelarEdicionPlaylist() {
+        uiState = uiState.copy(
+            playlistEditando = null,
+            nombreEditando = "",
+            descripcionEditando = "",
+            error = "",
+            mensaje = ""
+        )
+    }
+
+
+    fun onNombreEditandoChange(value: String) {
+        uiState = uiState.copy(
+            nombreEditando = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun onDescripcionEditandoChange(value: String) {
+        uiState = uiState.copy(
+            descripcionEditando = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun guardarEdicionPlaylist() {
+        val playlistActual = uiState.playlistEditando ?: return
+        val nombre = uiState.nombreEditando.trim()
+        val descripcion = uiState.descripcionEditando.trim()
+
+        if (nombre.isBlank()) {
+            uiState = uiState.copy(error = "El nombre no puede estar vacío")
+            return
+        }
+
+        val playlistActualizada = playlistActual.copy(
+            nombre = nombre,
+            descripcion = descripcion.ifBlank { "Playlist creada por ti" }
+        )
+
+        viewModelScope.launch {
+            when (val result = musicRepository.actualizarPlaylist(playlistActualizada)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        playlists = uiState.playlists.map { playlist ->
+                            if (playlist.id == result.data.id) result.data else playlist
+                        },
+                        playlistEditando = null,
+                        nombreEditando = "",
+                        descripcionEditando = "",
+                        error = "",
+                        mensaje = "Playlist actualizada correctamente"
                     )
                 }
 
