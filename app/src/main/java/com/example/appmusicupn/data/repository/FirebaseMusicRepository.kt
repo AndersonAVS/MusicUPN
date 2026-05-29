@@ -107,4 +107,29 @@ class FirebaseMusicRepository(
             RepositoryResult.Error("No se pudo actualizar la playlist")
         }
     }
+
+    override suspend fun eliminarPlaylist(
+        playlistId: String
+    ): RepositoryResult<Unit> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        return try {
+            firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("playlists")
+                .document(playlistId)
+                .delete()
+                .await()
+
+            RepositoryResult.Success(Unit)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo eliminar la playlist")
+        }
+    }
 }

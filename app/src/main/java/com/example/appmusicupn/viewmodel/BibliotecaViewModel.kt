@@ -20,6 +20,7 @@ data class BibliotecaUiState(
     val playlistEditando: Playlist? = null,
     val nombreEditando: String = "",
     val descripcionEditando: String = "",
+    val playlistPendienteEliminar: Playlist? = null
 )
 
 class BibliotecaViewModel(
@@ -162,6 +163,46 @@ class BibliotecaViewModel(
 
                 is RepositoryResult.Error -> {
                     uiState = uiState.copy(
+                        error = result.message,
+                        mensaje = ""
+                    )
+                }
+            }
+        }
+    }
+
+    fun solicitarEliminarPlaylist() {
+        val playlist = uiState.playlistEditando ?: return
+
+        uiState = uiState.copy(
+            playlistPendienteEliminar = playlist
+        )
+    }
+    fun cancelarEliminarPlaylist() {
+        uiState = uiState.copy(
+            playlistPendienteEliminar = null
+        )
+    }
+    fun confirmarEliminarPlaylist() {
+        val playlist = uiState.playlistPendienteEliminar ?: return
+
+        viewModelScope.launch {
+            when (val result = musicRepository.eliminarPlaylist(playlist.id)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        playlists = uiState.playlists.filter { it.id != playlist.id },
+                        playlistEditando = null,
+                        playlistPendienteEliminar = null,
+                        nombreEditando = "",
+                        descripcionEditando = "",
+                        error = "",
+                        mensaje = "Playlist eliminada correctamente"
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        playlistPendienteEliminar = null,
                         error = result.message,
                         mensaje = ""
                     )

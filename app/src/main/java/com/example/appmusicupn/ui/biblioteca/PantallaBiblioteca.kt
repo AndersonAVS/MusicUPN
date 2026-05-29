@@ -78,7 +78,7 @@ fun PantallaBiblioteca(
                     onDismissRequest = { mostrarMenuCuenta = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Configuracion de la cuenta") },
+                        text = { Text("Configuración de la cuenta") },
                         onClick = {
                             mostrarMenuCuenta = false
                             navController.navigate("configuracion_cuenta")
@@ -86,7 +86,7 @@ fun PantallaBiblioteca(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Cerrar sesion") },
+                        text = { Text("Cerrar sesión") },
                         onClick = {
                             mostrarMenuCuenta = false
                             homeViewModel.cerrarSesion()
@@ -121,7 +121,7 @@ fun PantallaBiblioteca(
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
             ChipBiblioteca("Playlists")
             ChipBiblioteca("Podcasts")
-            ChipBiblioteca("Albumes")
+            ChipBiblioteca("Álbumes")
             ChipBiblioteca("Artistas")
         }
 
@@ -137,7 +137,7 @@ fun PantallaBiblioteca(
 
         if (bibliotecaState.playlists.isEmpty()) {
             Text(
-                text = "Aun no tienes playlists creadas",
+                text = "Aún no tienes playlists creadas",
                 color = Color.Gray
             )
         } else {
@@ -235,7 +235,7 @@ fun PantallaBiblioteca(
                     OutlinedTextField(
                         value = bibliotecaState.descripcionEditando,
                         onValueChange = bibliotecaViewModel::onDescripcionEditandoChange,
-                        label = { Text("Descripcion") },
+                        label = { Text("Descripción") },
                         singleLine = true
                     )
                 }
@@ -250,9 +250,57 @@ fun PantallaBiblioteca(
                 }
             },
             dismissButton = {
+                Row {
+                    TextButton(
+                        onClick = {
+                            bibliotecaViewModel.solicitarEliminarPlaylist()
+                        }
+                    ) {
+                        Text(
+                            text = "Eliminar",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    TextButton(
+                        onClick = {
+                            bibliotecaViewModel.cancelarEdicionPlaylist()
+                        }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            }
+        )
+    }
+
+    if (bibliotecaState.playlistPendienteEliminar != null) {
+        AlertDialog(
+            onDismissRequest = {
+                bibliotecaViewModel.cancelarEliminarPlaylist()
+            },
+            title = { Text("Eliminar playlist") },
+            text = {
+                Text(
+                    text = "¿Seguro que quieres eliminar \"${bibliotecaState.playlistPendienteEliminar.nombre}\"?"
+                )
+            },
+            confirmButton = {
                 TextButton(
                     onClick = {
-                        bibliotecaViewModel.cancelarEdicionPlaylist()
+                        bibliotecaViewModel.confirmarEliminarPlaylist()
+                    }
+                ) {
+                    Text(
+                        text = "Eliminar",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        bibliotecaViewModel.cancelarEliminarPlaylist()
                     }
                 ) {
                     Text("Cancelar")

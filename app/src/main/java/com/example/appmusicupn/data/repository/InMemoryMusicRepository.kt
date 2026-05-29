@@ -61,4 +61,16 @@ class InMemoryMusicRepository : MusicRepository {
 
         return RepositoryResult.Success(playlist)
     }
+
+    override suspend fun eliminarPlaylist(
+        playlistId: String
+    ): RepositoryResult<Unit> {
+        val eliminada = playlists.removeIf { it.id == playlistId }
+
+        return if (eliminada) {
+            RepositoryResult.Success(Unit)
+        } else {
+            RepositoryResult.Error("No se encontró la playlist")
+        }
+    }
 }

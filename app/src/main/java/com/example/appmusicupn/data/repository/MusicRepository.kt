@@ -16,4 +16,6 @@ interface MusicRepository {
     suspend fun obtenerPlaylistsUsuario(): RepositoryResult<List<Playlist>>
 
     suspend fun actualizarPlaylist(playlist: Playlist): RepositoryResult<Playlist>
+
+    suspend fun eliminarPlaylist(playlistId: String): RepositoryResult<Unit>
 }
