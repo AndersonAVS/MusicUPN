@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.appmusicupn.data.model.UserRole
 import com.example.appmusicupn.data.repository.AuthRepository
 import com.example.appmusicupn.data.repository.RepositoryProvider
 import com.example.appmusicupn.data.repository.RepositoryResult
@@ -17,9 +16,7 @@ data class LoginUiState(
     val password: String = "",
     val error: String = "",
     val loginExitoso: Boolean = false,
-    val mensaje: String = "",
-    val rol: UserRole? = null
-
+    val mensaje: String = ""
 )
 
 class LoginViewModel(
@@ -50,8 +47,7 @@ class LoginViewModel(
                 is RepositoryResult.Success -> {
                     uiState = uiState.copy(
                         error = "",
-                        loginExitoso = true,
-                        rol = result.data.rol
+                        loginExitoso = true
                     )
                 }
 

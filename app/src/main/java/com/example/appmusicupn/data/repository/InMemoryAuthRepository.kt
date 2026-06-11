@@ -1,28 +1,11 @@
 package com.example.appmusicupn.data.repository
 
-import com.example.appmusicupn.data.model.UserRole
 import com.example.appmusicupn.data.model.Usuario
 
 class InMemoryAuthRepository : AuthRepository {
-    private val usuarios = mutableMapOf(
-        "admin@musicupn.edu.pe" to Usuario(
-            id = "admin",
-            nombre = "Administrador",
-            correo = "admin@musicupn.edu.pe",
-            rol = UserRole.ADMIN
-        ),
-        "admin" to Usuario(
-            id = "admin-local",
-            nombre = "Administrador",
-            correo = "admin",
-            rol = UserRole.ADMIN
-        )
-    )
+    private val usuarios = mutableMapOf<String, Usuario>()
 
-    private val passwords = mutableMapOf(
-        "admin@musicupn.edu.pe" to "admin123",
-        "admin" to "1234"
-    )
+    private val passwords = mutableMapOf<String, String>()
 
     override suspend fun login(correo: String, password: String): RepositoryResult<Usuario> {
         val key = correo.trim()
@@ -50,8 +33,7 @@ class InMemoryAuthRepository : AuthRepository {
         val usuario = Usuario(
             id = "user-${usuarios.size + 1}",
             nombre = nombre.trim(),
-            correo = key,
-            rol = UserRole.USER
+            correo = key
         )
 
         usuarios[key] = usuario

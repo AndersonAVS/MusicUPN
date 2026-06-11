@@ -1,6 +1,5 @@
 package com.example.appmusicupn.data.repository
 
-import com.example.appmusicupn.data.model.UserRole
 import com.example.appmusicupn.data.model.Usuario
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -30,8 +29,7 @@ class FirebaseAuthRepository(
             val usuario = Usuario(
                 id = firebaseUser.uid,
                 nombre = firebaseUser.displayName ?: "Usuario",
-                correo = firebaseUser.email ?: correo.trim(),
-                rol = UserRole.USER
+                correo = firebaseUser.email ?: correo.trim()
             )
 
             RepositoryResult.Success(usuario)
@@ -83,8 +81,7 @@ class FirebaseAuthRepository(
             val usuario = Usuario(
                 id = firebaseUser.uid,
                 nombre = nombre.trim(),
-                correo = firebaseUser.email ?: correo.trim(),
-                rol = UserRole.USER
+                correo = firebaseUser.email ?: correo.trim()
             )
 
             RepositoryResult.Success(usuario)

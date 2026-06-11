@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.appmusicupn.data.model.UserRole
 import com.example.appmusicupn.viewmodel.LoginViewModel
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
@@ -31,13 +30,7 @@ fun PantallaLogin(
 
     LaunchedEffect(uiState.loginExitoso) {
         if (uiState.loginExitoso) {
-            val destino = when (uiState.rol) {
-                UserRole.ADMIN -> "home"
-                UserRole.USER -> "home"
-                null -> "home"
-            }
-
-            navController.navigate(destino) {
+            navController.navigate("home") {
                 popUpTo("inicio") {
                     inclusive = true
                 }
