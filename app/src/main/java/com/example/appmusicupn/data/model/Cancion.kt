@@ -7,5 +7,5 @@ data class Cancion(
     val album: String = "",
     val audioUrl: String = "",
     val portadaUrl: String = "",
-    val activa: Boolean = true
+    val origen: String = "jamendo"
 )

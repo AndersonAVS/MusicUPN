@@ -6,11 +6,16 @@ import com.example.appmusicupn.data.model.RadioStation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import com.example.appmusicupn.data.model.Cancion
+import com.example.appmusicupn.data.remote.JamendoApiClient
 
 class FirebaseMusicRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+
 ) : MusicRepository {
+
+    private val jamendoClientId = "52c40038"
 
     override fun obtenerAlbumesPopulares(): List<Album> = listOf(
         Album(id = "album-1", titulo = "Homerun", artista = "Paulo Londra"),
@@ -130,6 +135,39 @@ class FirebaseMusicRepository(
             RepositoryResult.Success(Unit)
         } catch (exception: Exception) {
             RepositoryResult.Error("No se pudo eliminar la playlist")
+        }
+    }
+
+    override suspend fun buscarCancionesWeb(
+        query: String
+    ): RepositoryResult<List<Cancion>> {
+        val queryLimpio = query.trim()
+
+        if (queryLimpio.isBlank()) {
+            return RepositoryResult.Error("Ingresa una búsqueda")
+        }
+
+        return try {
+            val response = JamendoApiClient.service.buscarTracks(
+                clientId = jamendoClientId,
+                search = queryLimpio
+            )
+
+            val canciones = response.results.map { track ->
+                Cancion(
+                    id = track.id,
+                    titulo = track.name,
+                    artista = track.artist_name,
+                    album = track.album_name,
+                    audioUrl = track.audio,
+                    portadaUrl = track.album_image,
+                    origen = "jamendo"
+                )
+            }
+
+            RepositoryResult.Success(canciones)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudieron buscar canciones")
         }
     }
 }

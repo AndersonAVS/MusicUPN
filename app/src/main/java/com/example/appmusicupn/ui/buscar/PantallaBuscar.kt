@@ -1,44 +1,58 @@
 package com.example.appmusicupn.ui.buscar
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.appmusicupn.components.BottomMenu
-import com.example.appmusicupn.components.CategoriaCard
 import com.example.appmusicupn.components.MiniPlayer
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmusicupn.viewmodel.BuscarViewModel
 import com.example.appmusicupn.viewmodel.HomeViewModel
 
 @Composable
 fun PantallaBuscar(
     navController: NavController,
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = viewModel(),
+    buscarViewModel: BuscarViewModel = viewModel()
 ) {
-
+    val buscarState = buscarViewModel.uiState
     var mostrarMenuCuenta by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +65,7 @@ fun PantallaBuscar(
             Column {
                 Text(
                     text = "A",
-                    color = Color.Black,
+                    color = Color.White,
                     modifier = Modifier
                         .background(Color(0xFFB39DDB), RoundedCornerShape(50))
                         .clickable { mostrarMenuCuenta = true }
@@ -96,42 +110,92 @@ fun PantallaBuscar(
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White, RoundedCornerShape(6.dp))
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        OutlinedTextField(
+            value = buscarState.query,
+            onValueChange = buscarViewModel::onQueryChange,
+            label = { Text("¿Qué quieres escuchar?", color = Color.White) },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = buscarViewModel::buscarCanciones,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !buscarState.cargando
         ) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = Color.Black)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "¿Qué quieres escuchar?",
-                color = Color.DarkGray,
-                fontWeight = FontWeight.Bold
+            Text("Buscar")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (buscarState.cargando) {
+            CircularProgressIndicator(
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        if (buscarState.error.isNotEmpty()) {
+            Text(
+                text = buscarState.error,
+                color = MaterialTheme.colorScheme.error
+            )
 
-        Text(
-            text = "Descubre algo nuevo para ti",
-            color = Color.White,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            CategoriaCard("#reggaeton", Color(0xFF6D1B1B))
-            CategoriaCard("#urbano latino", Color(0xFF1E3A8A))
-            CategoriaCard("#sunrise", Color(0xFFB45309))
+            Spacer(modifier = Modifier.height(12.dp))
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            buscarState.canciones.forEach { cancion ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color(0xFF374151), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("♫", color = Color.White)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = cancion.titulo,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = cancion.artista,
+                            color = Color.Gray
+                        )
+
+                        if (cancion.album.isNotBlank()) {
+                            Text(
+                                text = cancion.album,
+                                color = Color.DarkGray
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         MiniPlayer()
 

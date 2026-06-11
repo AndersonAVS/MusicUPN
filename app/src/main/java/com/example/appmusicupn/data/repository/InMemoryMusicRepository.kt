@@ -3,6 +3,7 @@ package com.example.appmusicupn.data.repository
 import com.example.appmusicupn.data.model.Album
 import com.example.appmusicupn.data.model.Playlist
 import com.example.appmusicupn.data.model.RadioStation
+import com.example.appmusicupn.data.model.Cancion
 
 class InMemoryMusicRepository : MusicRepository {
 
@@ -72,5 +73,53 @@ class InMemoryMusicRepository : MusicRepository {
         } else {
             RepositoryResult.Error("No se encontró la playlist")
         }
+    }
+
+    override suspend fun buscarCancionesWeb(
+        query: String
+    ): RepositoryResult<List<Cancion>> {
+        val queryLimpio = query.trim()
+
+        if (queryLimpio.isBlank()) {
+            return RepositoryResult.Error("Ingresa una búsqueda")
+        }
+
+        val cancionesMock = listOf(
+            Cancion(
+                id = "mock-1",
+                titulo = "Canción de prueba",
+                artista = "MusicUPN",
+                album = "Demo",
+                audioUrl = "",
+                portadaUrl = "",
+                origen = "mock"
+            ),
+            Cancion(
+                id = "mock-2",
+                titulo = "Rock libre",
+                artista = "Artista demo",
+                album = "Jamendo Demo",
+                audioUrl = "",
+                portadaUrl = "",
+                origen = "mock"
+            ),
+            Cancion(
+                id = "mock-3",
+                titulo = "Piano instrumental",
+                artista = "Demo Artist",
+                album = "Instrumental",
+                audioUrl = "",
+                portadaUrl = "",
+                origen = "mock"
+            )
+        )
+
+        val resultados = cancionesMock.filter { cancion ->
+            cancion.titulo.contains(queryLimpio, ignoreCase = true) ||
+                cancion.artista.contains(queryLimpio, ignoreCase = true) ||
+                cancion.album.contains(queryLimpio, ignoreCase = true)
+        }
+
+        return RepositoryResult.Success(resultados)
     }
 }
