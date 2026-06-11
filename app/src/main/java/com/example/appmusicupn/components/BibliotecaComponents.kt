@@ -11,6 +11,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @Composable
 fun ChipBiblioteca(texto: String) {
@@ -31,7 +35,7 @@ fun BibliotecaItem(
     icono: String,
     color: Color,
     onClick: () -> Unit = {},
-
+    onMoreClick: () -> Unit = {}
 
 ) {
 
@@ -54,9 +58,18 @@ fun BibliotecaItem(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(titulo, color = Color.White, fontWeight = FontWeight.Bold)
             Text(descripcion, color = Color.Gray)
+        }
+        IconButton(onClick = onMoreClick) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Opciones de playlist",
+                tint = Color.White
+            )
         }
     }
 }

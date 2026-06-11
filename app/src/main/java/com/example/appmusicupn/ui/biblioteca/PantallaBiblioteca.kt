@@ -43,7 +43,21 @@ import com.example.appmusicupn.components.ChipBiblioteca
 import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.viewmodel.BibliotecaViewModel
 import com.example.appmusicupn.viewmodel.HomeViewModel
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.ui.graphics.vector.ImageVector
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaBiblioteca(
     navController: NavController,
@@ -147,8 +161,9 @@ fun PantallaBiblioteca(
                     descripcion = playlist.descripcion,
                     icono = "♫",
                     color = Color(0xFF374151),
-                    onClick = {
-                        bibliotecaViewModel.seleccionarPlaylistParaEditar(playlist)
+                    onClick = {},
+                    onMoreClick = {
+                        bibliotecaViewModel.abrirOpcionesPlaylist(playlist)
                     }
                 )
             }
@@ -306,6 +321,126 @@ fun PantallaBiblioteca(
                     Text("Cancelar")
                 }
             }
+        )
+    }
+    if (bibliotecaState.playlistOpciones != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                bibliotecaViewModel.cerrarOpcionesPlaylist()
+            },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = Color(0xFF202020)
+        ) {
+            val playlist = bibliotecaState.playlistOpciones
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color(0xFF374151), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("♫", color = Color.White)
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(
+                            text = playlist.nombre,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "Playlist creada por ti",
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OpcionPlaylistSheet(
+                    icon = Icons.Default.Share,
+                    texto = "Compartir",
+                    onClick = {
+                        bibliotecaViewModel.cerrarOpcionesPlaylist()
+                    }
+                )
+
+                OpcionPlaylistSheet(
+                    icon = Icons.Default.Edit,
+                    texto = "Editar playlist",
+                    onClick = {
+                        bibliotecaViewModel.seleccionarPlaylistParaEditar(playlist)
+                    }
+                )
+
+                OpcionPlaylistSheet(
+                    icon = Icons.Default.Lock,
+                    texto = "Hacer privada",
+                    onClick = {
+                        bibliotecaViewModel.cerrarOpcionesPlaylist()
+                    }
+                )
+
+                OpcionPlaylistSheet(
+                    icon = Icons.Default.PushPin,
+                    texto = "Fijar playlist",
+                    onClick = {
+                        bibliotecaViewModel.cerrarOpcionesPlaylist()
+                    }
+                )
+
+                OpcionPlaylistSheet(
+                    icon = Icons.Default.Delete,
+                    texto = "Eliminar playlist",
+                    colorTexto = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        bibliotecaViewModel.solicitarEliminarPlaylist()
+                    }
+                )
+            }
+        }
+    }
+
+}
+@Composable
+private fun OpcionPlaylistSheet(
+    icon: ImageVector,
+    texto: String,
+    colorTexto: Color = Color.White,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.LightGray,
+            modifier = Modifier.size(30.dp)
+        )
+
+        Spacer(modifier = Modifier.width(20.dp))
+
+        Text(
+            text = texto,
+            color = colorTexto,
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }

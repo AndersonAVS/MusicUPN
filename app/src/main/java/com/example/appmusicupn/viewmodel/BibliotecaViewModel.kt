@@ -20,7 +20,8 @@ data class BibliotecaUiState(
     val playlistEditando: Playlist? = null,
     val nombreEditando: String = "",
     val descripcionEditando: String = "",
-    val playlistPendienteEliminar: Playlist? = null
+    val playlistPendienteEliminar: Playlist? = null,
+    val playlistOpciones: Playlist? = null,
 )
 
 class BibliotecaViewModel(
@@ -93,10 +94,23 @@ class BibliotecaViewModel(
             }
         }
     }
+    fun abrirOpcionesPlaylist(playlist: Playlist) {
+        uiState = uiState.copy(
+            playlistOpciones = playlist,
+            error = "",
+            mensaje = ""
+        )
+    }
+    fun cerrarOpcionesPlaylist() {
+        uiState = uiState.copy(
+            playlistOpciones = null
+        )
+    }
 
     fun seleccionarPlaylistParaEditar(playlist: Playlist) {
         uiState = uiState.copy(
             playlistEditando = playlist,
+            playlistOpciones = null,
             nombreEditando = playlist.nombre,
             descripcionEditando = playlist.descripcion,
             error = "",
@@ -172,10 +186,13 @@ class BibliotecaViewModel(
     }
 
     fun solicitarEliminarPlaylist() {
-        val playlist = uiState.playlistEditando ?: return
+        val playlist = uiState.playlistEditando
+            ?: uiState.playlistOpciones
+            ?: return
 
         uiState = uiState.copy(
-            playlistPendienteEliminar = playlist
+            playlistPendienteEliminar = playlist,
+            playlistOpciones = null
         )
     }
     fun cancelarEliminarPlaylist() {
