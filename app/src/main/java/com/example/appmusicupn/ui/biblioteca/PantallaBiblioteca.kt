@@ -57,6 +57,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.appmusicupn.viewmodel.PlaybackViewModel
+import com.example.appmusicupn.data.model.Cancion
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,6 +154,55 @@ fun PantallaBiblioteca(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Canciones favoritas",
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (bibliotecaState.favoritos.isEmpty()) {
+            Text(
+                text = "Aún no tienes canciones favoritas",
+                color = Color.Gray
+            )
+        } else {
+            bibliotecaState.favoritos.forEach { favorito ->
+                BibliotecaItem(
+                    titulo = favorito.titulo,
+                    descripcion = favorito.artista,
+                    icono = "♥",
+                    color = Color(0xFF6D4C41),
+                    onClick = {
+                        playbackViewModel.reproducirCancion(
+                            com.example.appmusicupn.data.model.Cancion(
+                                id = favorito.id,
+                                titulo = favorito.titulo,
+                                artista = favorito.artista,
+                                album = favorito.album,
+                                audioUrl = favorito.audioUrl,
+                                portadaUrl = favorito.portadaUrl,
+                                origen = favorito.origen
+                            )
+                        )
+                    },
+                    onMoreClick = {}
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Playlists",
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         if (bibliotecaState.playlists.isEmpty()) {
             Text(

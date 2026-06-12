@@ -207,4 +207,28 @@ class FirebaseMusicRepository(
             RepositoryResult.Error("No se pudo agregar a favoritos")
         }
     }
+
+    override suspend fun obtenerFavoritosUsuario(): RepositoryResult<List<Favorito>> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        return try {
+            val snapshot = firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("favoritos")
+                .get()
+                .await()
+
+            val favoritos = snapshot.documents.mapNotNull { document ->
+                document.toObject(Favorito::class.java)
+            }.sortedByDescending { favorito ->
+                favorito.fechaAgregado
+            }
+
+            RepositoryResult.Success(favoritos)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudieron cargar tus favoritos")
+        }
+    }
 }

@@ -10,9 +10,11 @@ import com.example.appmusicupn.data.repository.MusicRepository
 import com.example.appmusicupn.data.repository.RepositoryProvider
 import com.example.appmusicupn.data.repository.RepositoryResult
 import kotlinx.coroutines.launch
+import com.example.appmusicupn.data.model.Favorito
 
 data class BibliotecaUiState(
     val playlists: List<Playlist> = emptyList(),
+    val favoritos: List<Favorito> = emptyList(),
     val nombreNuevaPlaylist: String = "",
     val error: String = "",
     val mensaje: String = "",
@@ -32,8 +34,9 @@ class BibliotecaViewModel(
         private set
 
     init {
-        cargarPlaylists()
+        cargarBiblioteca()
     }
+
 
     fun onNombreNuevaPlaylistChange(value: String) {
         uiState = uiState.copy(
@@ -222,6 +225,34 @@ class BibliotecaViewModel(
                         playlistPendienteEliminar = null,
                         error = result.message,
                         mensaje = ""
+                    )
+                }
+            }
+        }
+    }
+
+    fun cargarBiblioteca() {
+        cargarPlaylists()
+        cargarFavoritos()
+    }
+
+    fun cargarFavoritos() {
+        viewModelScope.launch {
+            uiState = uiState.copy(cargando = true)
+
+            when (val result = musicRepository.obtenerFavoritosUsuario()) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        favoritos = result.data,
+                        cargando = false,
+                        error = ""
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        cargando = false,
+                        error = result.message
                     )
                 }
             }

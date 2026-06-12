@@ -148,4 +148,12 @@ class InMemoryMusicRepository : MusicRepository {
 
         return RepositoryResult.Success(favorito)
     }
+
+    override suspend fun obtenerFavoritosUsuario(): RepositoryResult<List<Favorito>> {
+        val favoritosOrdenados = favoritos.sortedByDescending { favorito ->
+            favorito.fechaAgregado
+        }
+
+        return RepositoryResult.Success(favoritosOrdenados)
+    }
 }

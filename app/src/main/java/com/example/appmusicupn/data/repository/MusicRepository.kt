@@ -24,4 +24,6 @@ interface MusicRepository {
     suspend fun buscarCancionesWeb(query: String): RepositoryResult<List<Cancion>>
 
     suspend fun agregarFavorito(cancion: Cancion): RepositoryResult<Favorito>
+
+    suspend fun obtenerFavoritosUsuario(): RepositoryResult<List<Favorito>>
 }
