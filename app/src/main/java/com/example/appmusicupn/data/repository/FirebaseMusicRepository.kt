@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.appmusicupn.data.model.Cancion
 import com.example.appmusicupn.data.remote.JamendoApiClient
+import com.example.appmusicupn.data.model.Favorito
 
 class FirebaseMusicRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
@@ -168,6 +169,42 @@ class FirebaseMusicRepository(
             RepositoryResult.Success(canciones)
         } catch (exception: Exception) {
             RepositoryResult.Error("No se pudieron buscar canciones")
+        }
+    }
+
+    override suspend fun agregarFavorito(
+        cancion: Cancion
+    ): RepositoryResult<Favorito> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (cancion.id.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        return try {
+            val favorito = Favorito(
+                id = cancion.id,
+                titulo = cancion.titulo,
+                artista = cancion.artista,
+                album = cancion.album,
+                audioUrl = cancion.audioUrl,
+                portadaUrl = cancion.portadaUrl,
+                origen = cancion.origen,
+                fechaAgregado = System.currentTimeMillis()
+            )
+
+            firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("favoritos")
+                .document(cancion.id)
+                .set(favorito)
+                .await()
+
+            RepositoryResult.Success(favorito)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo agregar a favoritos")
         }
     }
 }

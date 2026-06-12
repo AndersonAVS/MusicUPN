@@ -56,17 +56,22 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.appmusicupn.viewmodel.PlaybackViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaBiblioteca(
     navController: NavController,
+    playbackViewModel: PlaybackViewModel,
     homeViewModel: HomeViewModel = viewModel(),
-    bibliotecaViewModel: BibliotecaViewModel = viewModel()
+    bibliotecaViewModel: BibliotecaViewModel = viewModel(),
+
+
 ) {
     val bibliotecaState = bibliotecaViewModel.uiState
     var mostrarMenuCuenta by remember { mutableStateOf(false) }
     var mostrarDialogCrearPlaylist by remember { mutableStateOf(false) }
+    val playbackState = playbackViewModel.uiState
 
     Column(
         modifier = Modifier
@@ -187,7 +192,14 @@ fun PantallaBiblioteca(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        MiniPlayer()
+        MiniPlayer(
+            cancionActual = playbackState.cancionActual,
+            reproduciendo = playbackState.reproduciendo,
+            onPlayPauseClick = playbackViewModel::alternarPlayPause,
+            onStopClick = playbackViewModel::detenerReproduccion
+
+
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 

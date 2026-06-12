@@ -1,8 +1,8 @@
 package com.example.appmusicupn.ui.buscar
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,21 +11,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,12 +50,12 @@ import com.example.appmusicupn.viewmodel.PlaybackViewModel
 @Composable
 fun PantallaBuscar(
     navController: NavController,
+    playbackViewModel: PlaybackViewModel,
     homeViewModel: HomeViewModel = viewModel(),
-    buscarViewModel: BuscarViewModel = viewModel(),
-    playbackViewModel: PlaybackViewModel = viewModel()
+    buscarViewModel: BuscarViewModel = viewModel()
 ) {
-    val playbackState = playbackViewModel.uiState
     val buscarState = buscarViewModel.uiState
+    val playbackState = playbackViewModel.uiState
     var mostrarMenuCuenta by remember { mutableStateOf(false) }
 
     Column(
@@ -68,7 +70,7 @@ fun PantallaBuscar(
             Column {
                 Text(
                     text = "A",
-                    color = Color.White,
+                    color = Color.Black,
                     modifier = Modifier
                         .background(Color(0xFFB39DDB), RoundedCornerShape(50))
                         .clickable { mostrarMenuCuenta = true }
@@ -118,7 +120,7 @@ fun PantallaBuscar(
         OutlinedTextField(
             value = buscarState.query,
             onValueChange = buscarViewModel::onQueryChange,
-            label = { Text("¿Qué quieres escuchar?", color = Color.White) },
+            label = { Text("¿Qué quieres escuchar?") },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = null)
             },
@@ -153,6 +155,18 @@ fun PantallaBuscar(
 
             Spacer(modifier = Modifier.height(12.dp))
         }
+
+
+
+        if (buscarState.mensaje.isNotEmpty()) {
+            Text(
+                text = buscarState.mensaje,
+                color = Color(0xFF81C784)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
         if (playbackState.error.isNotEmpty()) {
             Text(
                 text = playbackState.error,
@@ -177,7 +191,7 @@ fun PantallaBuscar(
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.foundation.layout.Box(
+                    Box(
                         modifier = Modifier
                             .size(56.dp)
                             .background(Color(0xFF374151), RoundedCornerShape(6.dp)),
@@ -188,7 +202,9 @@ fun PantallaBuscar(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Column {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text(
                             text = cancion.titulo,
                             color = Color.White,
@@ -206,6 +222,18 @@ fun PantallaBuscar(
                                 color = Color.DarkGray
                             )
                         }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            buscarViewModel.agregarAFavoritos(cancion)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "Agregar a favoritos",
+                            tint = Color.White
+                        )
                     }
                 }
             }

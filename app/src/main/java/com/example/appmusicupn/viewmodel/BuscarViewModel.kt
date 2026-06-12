@@ -15,6 +15,7 @@ data class BuscarUiState(
     val query: String = "",
     val canciones: List<Cancion> = emptyList(),
     val cargando: Boolean = false,
+    val mensaje: String = "",
     val error: String = ""
 )
 
@@ -28,7 +29,8 @@ class BuscarViewModel(
     fun onQueryChange(value: String) {
         uiState = uiState.copy(
             query = value,
-            error = ""
+            error = "",
+            mensaje = ""
         )
     }
 
@@ -63,6 +65,26 @@ class BuscarViewModel(
                         canciones = emptyList(),
                         cargando = false,
                         error = result.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun agregarAFavoritos(cancion: Cancion) {
+        viewModelScope.launch {
+            when (val result = musicRepository.agregarFavorito(cancion)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        error = "",
+                        mensaje = "Agregado a favoritos"
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        error = result.message,
+                        mensaje = ""
                     )
                 }
             }

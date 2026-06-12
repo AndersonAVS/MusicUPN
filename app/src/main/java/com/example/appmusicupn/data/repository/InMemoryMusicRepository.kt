@@ -4,9 +4,11 @@ import com.example.appmusicupn.data.model.Album
 import com.example.appmusicupn.data.model.Playlist
 import com.example.appmusicupn.data.model.RadioStation
 import com.example.appmusicupn.data.model.Cancion
+import com.example.appmusicupn.data.model.Favorito
 
 class InMemoryMusicRepository : MusicRepository {
 
+    private val favoritos = mutableListOf<Favorito>()
     private val playlists = mutableListOf<Playlist>()
 
     override fun obtenerAlbumesPopulares(): List<Album> = listOf(
@@ -121,5 +123,29 @@ class InMemoryMusicRepository : MusicRepository {
         }
 
         return RepositoryResult.Success(resultados)
+    }
+
+    override suspend fun agregarFavorito(
+        cancion: Cancion
+    ): RepositoryResult<Favorito> {
+        if (cancion.id.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        val favorito = Favorito(
+            id = cancion.id,
+            titulo = cancion.titulo,
+            artista = cancion.artista,
+            album = cancion.album,
+            audioUrl = cancion.audioUrl,
+            portadaUrl = cancion.portadaUrl,
+            origen = cancion.origen,
+            fechaAgregado = System.currentTimeMillis()
+        )
+
+        favoritos.removeAll { it.id == favorito.id }
+        favoritos.add(favorito)
+
+        return RepositoryResult.Success(favorito)
     }
 }

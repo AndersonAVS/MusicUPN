@@ -38,14 +38,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import com.example.appmusicupn.viewmodel.PlaybackViewModel
 
 @Composable
 fun PantallaHome(
     navController: NavController,
+    playbackViewModel: PlaybackViewModel,
     homeViewModel: HomeViewModel = viewModel()
+
+
 ) {
     val uiState = homeViewModel.uiState
     var mostrarMenuCuenta by remember { mutableStateOf(false) }
+    val playbackState = playbackViewModel.uiState
 
     Column(
         modifier = Modifier
@@ -153,7 +158,12 @@ fun PantallaHome(
             }
         }
 
-        MiniPlayer()
+        MiniPlayer(
+            cancionActual = playbackState.cancionActual,
+            reproduciendo = playbackState.reproduciendo,
+            onPlayPauseClick = playbackViewModel::alternarPlayPause,
+            onStopClick = playbackViewModel::detenerReproduccion
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 

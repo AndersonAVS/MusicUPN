@@ -11,18 +11,21 @@ import com.example.appmusicupn.ui.home.PantallaHome
 import com.example.appmusicupn.ui.inicio.PantallaInicio
 import com.example.appmusicupn.ui.login.PantallaLogin
 import com.example.appmusicupn.ui.registrar.PantallaRegistrar
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmusicupn.viewmodel.PlaybackViewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val playbackViewModel: PlaybackViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "inicio") {
         composable("inicio") { PantallaInicio(navController) }
         composable("login") { PantallaLogin(navController) }
         composable("registrar") { PantallaRegistrar(navController) }
-        composable("home") { PantallaHome(navController) }
-        composable("buscar") { PantallaBuscar(navController) }
-        composable("biblioteca") { PantallaBiblioteca(navController) }
+        composable("home") { PantallaHome(navController=navController, playbackViewModel = playbackViewModel) }
+        composable("buscar") { PantallaBuscar(navController=navController, playbackViewModel = playbackViewModel) }
+        composable("biblioteca") { PantallaBiblioteca(navController=navController, playbackViewModel = playbackViewModel) }
         composable("configuracion_cuenta"){ PantallaConfiguracionCuenta(navController) }
     }
 }

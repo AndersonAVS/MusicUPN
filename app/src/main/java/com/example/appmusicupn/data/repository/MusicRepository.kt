@@ -6,6 +6,7 @@ import com.example.appmusicupn.data.model.Cancion
 import com.example.appmusicupn.data.model.Playlist
 import com.example.appmusicupn.data.model.RadioStation
 import com.example.appmusicupn.data.repository.RepositoryResult
+import com.example.appmusicupn.data.model.Favorito
 
 interface MusicRepository {
     fun obtenerAlbumesPopulares(): List<Album>
@@ -21,4 +22,6 @@ interface MusicRepository {
     suspend fun eliminarPlaylist(playlistId: String): RepositoryResult<Unit>
 
     suspend fun buscarCancionesWeb(query: String): RepositoryResult<List<Cancion>>
+
+    suspend fun agregarFavorito(cancion: Cancion): RepositoryResult<Favorito>
 }
