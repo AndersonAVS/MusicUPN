@@ -14,6 +14,7 @@ import com.example.appmusicupn.data.model.Cancion
 data class PlaybackUiState(
     val cancionActual: Cancion? = null,
     val reproduciendo: Boolean = false,
+    val preparado: Boolean = false,
     val error: String = ""
 )
 
@@ -41,12 +42,16 @@ class PlaybackViewModel(
         uiState = uiState.copy(
             cancionActual = cancion,
             reproduciendo = true,
+            preparado = true,
             error = ""
         )
     }
 
     fun alternarPlayPause() {
-        if (uiState.cancionActual == null) {
+        val cancion = uiState.cancionActual ?: return
+
+        if (!uiState.preparado) {
+            reproducirCancion(cancion)
             return
         }
 
@@ -62,5 +67,14 @@ class PlaybackViewModel(
     override fun onCleared() {
         player.release()
         super.onCleared()
+    }
+
+    fun detenerReproduccion() {
+        player.stop()
+
+        uiState = uiState.copy(
+            reproduciendo = false,
+            preparado = false
+        )
     }
 }

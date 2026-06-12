@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.appmusicupn.data.model.Cancion
+import androidx.compose.material.icons.filled.Stop
 
 @Composable
 fun MiniPlayer(
     cancionActual: Cancion? = null,
     reproduciendo: Boolean = false,
-    onPlayPauseClick: () -> Unit = {}
+    onPlayPauseClick: () -> Unit = {},
+    onStopClick: () -> Unit = {}
 ) {
     val titulo = cancionActual?.titulo ?: "Tan solo tú"
     val artista = cancionActual?.artista ?: "La Llave"
@@ -71,6 +73,14 @@ fun MiniPlayer(
 
         Spacer(modifier = Modifier.width(12.dp))
 
+        IconButton(onClick = onStopClick) {
+            Icon(
+                imageVector = Icons.Default.Stop,
+                contentDescription = "Detener",
+                tint = Color.White
+            )
+        }
+
         IconButton(onClick = onPlayPauseClick) {
             Icon(
                 imageVector = if (reproduciendo) {
@@ -86,5 +96,6 @@ fun MiniPlayer(
                 tint = Color.White
             )
         }
+
     }
 }

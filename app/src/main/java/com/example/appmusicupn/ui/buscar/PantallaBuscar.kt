@@ -214,7 +214,8 @@ fun PantallaBuscar(
         MiniPlayer(
             cancionActual = playbackState.cancionActual,
             reproduciendo = playbackState.reproduciendo,
-            onPlayPauseClick = playbackViewModel::alternarPlayPause
+            onPlayPauseClick = playbackViewModel::alternarPlayPause,
+            onStopClick = playbackViewModel::detenerReproduccion
         )
 
         Spacer(modifier = Modifier.height(12.dp))
