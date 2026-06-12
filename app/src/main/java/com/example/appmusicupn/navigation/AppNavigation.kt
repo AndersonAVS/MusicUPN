@@ -14,6 +14,8 @@ import com.example.appmusicupn.ui.registrar.PantallaRegistrar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appmusicupn.viewmodel.PlaybackViewModel
 import com.example.appmusicupn.ui.favoritos.PantallaFavoritos
+import com.example.appmusicupn.data.model.Playlist
+import com.example.appmusicupn.ui.playlist.PantallaDetallePlaylist
 
 @Composable
 fun AppNavigation() {
@@ -28,6 +30,20 @@ fun AppNavigation() {
         composable("buscar") { PantallaBuscar(navController=navController, playbackViewModel = playbackViewModel) }
         composable("biblioteca") { PantallaBiblioteca(navController=navController, playbackViewModel = playbackViewModel) }
         composable("favoritos") { PantallaFavoritos(navController=navController, playbackViewModel=playbackViewModel) }
+        composable("detalle_playlist") {
+            val playlist = navController
+                .previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Playlist>("playlistSeleccionada")
+
+            if (playlist != null) {
+                PantallaDetallePlaylist(
+                    navController = navController,
+                    playbackViewModel = playbackViewModel,
+                    playlist = playlist
+                )
+            }
+        }
         composable("configuracion_cuenta"){ PantallaConfiguracionCuenta(navController) }
     }
 }

@@ -256,4 +256,134 @@ class FirebaseMusicRepository(
             RepositoryResult.Error("No se pudo quitar de favoritos")
         }
     }
+
+    override suspend fun agregarCancionAPlaylist(
+        playlistId: String,
+        cancion: Cancion
+    ): RepositoryResult<Unit> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        if (cancion.id.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        return try {
+            val playlistRef = firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("playlists")
+                .document(playlistId)
+
+            playlistRef
+                .collection("canciones")
+                .document(cancion.id)
+                .set(cancion)
+                .await()
+
+            val playlistSnapshot = playlistRef.get().await()
+            val playlist = playlistSnapshot.toObject(Playlist::class.java)
+
+            if (playlist != null) {
+                val cancionesActualizadas = if (playlist.cancionesIds.contains(cancion.id)) {
+                    playlist.cancionesIds
+                } else {
+                    playlist.cancionesIds + cancion.id
+                }
+
+                playlistRef
+                    .set(
+                        playlist.copy(
+                            cancionesIds = cancionesActualizadas
+                        )
+                    )
+                    .await()
+            }
+
+            RepositoryResult.Success(Unit)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo agregar la canción a la playlist")
+        }
+    }
+    override suspend fun obtenerCancionesDePlaylist(
+        playlistId: String
+    ): RepositoryResult<List<Cancion>> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        return try {
+            val snapshot = firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("playlists")
+                .document(playlistId)
+                .collection("canciones")
+                .get()
+                .await()
+
+            val canciones = snapshot.documents.mapNotNull { document ->
+                document.toObject(Cancion::class.java)
+            }
+
+            RepositoryResult.Success(canciones)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudieron cargar las canciones de la playlist")
+        }
+    }
+    override suspend fun eliminarCancionDePlaylist(
+        playlistId: String,
+        cancionId: String
+    ): RepositoryResult<Unit> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        if (cancionId.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        return try {
+            val playlistRef = firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("playlists")
+                .document(playlistId)
+
+            playlistRef
+                .collection("canciones")
+                .document(cancionId)
+                .delete()
+                .await()
+
+            val playlistSnapshot = playlistRef.get().await()
+            val playlist = playlistSnapshot.toObject(Playlist::class.java)
+
+            if (playlist != null) {
+                playlistRef
+                    .set(
+                        playlist.copy(
+                            cancionesIds = playlist.cancionesIds.filter { id ->
+                                id != cancionId
+                            }
+                        )
+                    )
+                    .await()
+            }
+
+            RepositoryResult.Success(Unit)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo quitar la canción de la playlist")
+        }
+    }
 }

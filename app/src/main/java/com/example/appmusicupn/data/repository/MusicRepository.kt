@@ -28,4 +28,18 @@ interface MusicRepository {
     suspend fun obtenerFavoritosUsuario(): RepositoryResult<List<Favorito>>
 
     suspend fun eliminarFavorito(favoritoId: String): RepositoryResult<Unit>
+
+    suspend fun agregarCancionAPlaylist(
+        playlistId: String,
+        cancion: Cancion
+    ): RepositoryResult<Unit>
+
+    suspend fun obtenerCancionesDePlaylist(
+        playlistId: String
+    ): RepositoryResult<List<Cancion>>
+
+    suspend fun eliminarCancionDePlaylist(
+        playlistId: String,
+        cancionId: String
+    ): RepositoryResult<Unit>
 }

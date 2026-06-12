@@ -11,6 +11,8 @@ class InMemoryMusicRepository : MusicRepository {
     private val favoritos = mutableListOf<Favorito>()
     private val playlists = mutableListOf<Playlist>()
 
+    private val cancionesPorPlaylist = mutableMapOf<String, MutableList<Cancion>>()
+
     override fun obtenerAlbumesPopulares(): List<Album> = listOf(
         Album(id = "album-1", titulo = "Homerun", artista = "Paulo Londra"),
         Album(id = "album-2", titulo = "Un Verano Sin Ti", artista = "Bad Bunny"),
@@ -168,5 +170,96 @@ class InMemoryMusicRepository : MusicRepository {
         } else {
             RepositoryResult.Error("No se encontró el favorito")
         }
+    }
+
+    override suspend fun agregarCancionAPlaylist(
+        playlistId: String,
+        cancion: Cancion
+    ): RepositoryResult<Unit> {
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        if (cancion.id.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        val index = playlists.indexOfFirst { playlist ->
+            playlist.id == playlistId
+        }
+
+        if (index == -1) {
+            return RepositoryResult.Error("No se encontró la playlist")
+        }
+
+        val canciones = cancionesPorPlaylist.getOrPut(playlistId) {
+            mutableListOf()
+        }
+
+        canciones.removeAll { item ->
+            item.id == cancion.id
+        }
+
+        canciones.add(cancion)
+
+        val playlistActual = playlists[index]
+
+        val cancionesIdsActualizadas = if (playlistActual.cancionesIds.contains(cancion.id)) {
+            playlistActual.cancionesIds
+        } else {
+            playlistActual.cancionesIds + cancion.id
+        }
+
+        playlists[index] = playlistActual.copy(
+            cancionesIds = cancionesIdsActualizadas
+        )
+
+        return RepositoryResult.Success(Unit)
+    }
+
+    override suspend fun obtenerCancionesDePlaylist(
+        playlistId: String
+    ): RepositoryResult<List<Cancion>> {
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        val canciones = cancionesPorPlaylist[playlistId].orEmpty()
+
+        return RepositoryResult.Success(canciones)
+    }
+    override suspend fun eliminarCancionDePlaylist(
+        playlistId: String,
+        cancionId: String
+    ): RepositoryResult<Unit> {
+        if (playlistId.isBlank()) {
+            return RepositoryResult.Error("Playlist inválida")
+        }
+
+        if (cancionId.isBlank()) {
+            return RepositoryResult.Error("Canción inválida")
+        }
+
+        val index = playlists.indexOfFirst { playlist ->
+            playlist.id == playlistId
+        }
+
+        if (index == -1) {
+            return RepositoryResult.Error("No se encontró la playlist")
+        }
+
+        cancionesPorPlaylist[playlistId]?.removeAll { cancion ->
+            cancion.id == cancionId
+        }
+
+        val playlistActual = playlists[index]
+
+        playlists[index] = playlistActual.copy(
+            cancionesIds = playlistActual.cancionesIds.filter { id ->
+                id != cancionId
+            }
+        )
+
+        return RepositoryResult.Success(Unit)
     }
 }

@@ -206,7 +206,11 @@ fun PantallaBiblioteca(
                     descripcion = playlist.descripcion,
                     icono = "♫",
                     color = Color(0xFF374151),
-                    onClick = {},
+                    onClick = {navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("playlistSeleccionada", playlist)
+
+                        navController.navigate("detalle_playlist")},
                     onMoreClick = {
                         bibliotecaViewModel.abrirOpcionesPlaylist(playlist)
                     }

@@ -46,6 +46,9 @@ import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.viewmodel.BuscarViewModel
 import com.example.appmusicupn.viewmodel.HomeViewModel
 import com.example.appmusicupn.viewmodel.PlaybackViewModel
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 @Composable
 fun PantallaBuscar(
@@ -223,6 +226,17 @@ fun PantallaBuscar(
                             )
                         }
                     }
+                    IconButton(
+                        onClick = {
+                            buscarViewModel.abrirSelectorPlaylist(cancion)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Agregar a playlist",
+                            tint = Color.White
+                        )
+                    }
 
                     IconButton(
                         onClick = {
@@ -249,5 +263,45 @@ fun PantallaBuscar(
         Spacer(modifier = Modifier.height(12.dp))
 
         BottomMenu(navController, "buscar")
+    }
+    if (buscarState.mostrandoSelectorPlaylist) {
+        AlertDialog(
+            onDismissRequest = {
+                buscarViewModel.cerrarSelectorPlaylist()
+            },
+            title = {
+                Text("Agregar a playlist")
+            },
+            text = {
+                Column {
+                    if (buscarState.playlists.isEmpty()) {
+                        Text("Aún no tienes playlists creadas")
+                    } else {
+                        buscarState.playlists.forEach { playlist ->
+                            Text(
+                                text = playlist.nombre,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        buscarViewModel.agregarCancionAPlaylist(playlist.id)
+                                    }
+                                    .padding(vertical = 12.dp),
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        buscarViewModel.cerrarSelectorPlaylist()
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
