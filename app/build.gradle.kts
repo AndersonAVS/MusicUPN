@@ -42,6 +42,8 @@ android {
 
 dependencies {
 
+    implementation("androidx.media3:media3-exoplayer:1.10.1")
+
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 

@@ -43,13 +43,16 @@ import com.example.appmusicupn.components.BottomMenu
 import com.example.appmusicupn.components.MiniPlayer
 import com.example.appmusicupn.viewmodel.BuscarViewModel
 import com.example.appmusicupn.viewmodel.HomeViewModel
+import com.example.appmusicupn.viewmodel.PlaybackViewModel
 
 @Composable
 fun PantallaBuscar(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    buscarViewModel: BuscarViewModel = viewModel()
+    buscarViewModel: BuscarViewModel = viewModel(),
+    playbackViewModel: PlaybackViewModel = viewModel()
 ) {
+    val playbackState = playbackViewModel.uiState
     val buscarState = buscarViewModel.uiState
     var mostrarMenuCuenta by remember { mutableStateOf(false) }
 
@@ -150,6 +153,14 @@ fun PantallaBuscar(
 
             Spacer(modifier = Modifier.height(12.dp))
         }
+        if (playbackState.error.isNotEmpty()) {
+            Text(
+                text = playbackState.error,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         Column(
             modifier = Modifier
@@ -160,7 +171,10 @@ fun PantallaBuscar(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp),
+                        .padding(vertical = 10.dp)
+                        .clickable {
+                            playbackViewModel.reproducirCancion(cancion)
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     androidx.compose.foundation.layout.Box(
@@ -197,7 +211,11 @@ fun PantallaBuscar(
             }
         }
 
-        MiniPlayer()
+        MiniPlayer(
+            cancionActual = playbackState.cancionActual,
+            reproduciendo = playbackState.reproduciendo,
+            onPlayPauseClick = playbackViewModel::alternarPlayPause
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
