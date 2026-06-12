@@ -156,4 +156,17 @@ class InMemoryMusicRepository : MusicRepository {
 
         return RepositoryResult.Success(favoritosOrdenados)
     }
+    override suspend fun eliminarFavorito(
+        favoritoId: String
+    ): RepositoryResult<Unit> {
+        val eliminado = favoritos.removeIf { favorito ->
+            favorito.id == favoritoId
+        }
+
+        return if (eliminado) {
+            RepositoryResult.Success(Unit)
+        } else {
+            RepositoryResult.Error("No se encontró el favorito")
+        }
+    }
 }

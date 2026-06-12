@@ -13,6 +13,7 @@ import com.example.appmusicupn.ui.login.PantallaLogin
 import com.example.appmusicupn.ui.registrar.PantallaRegistrar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appmusicupn.viewmodel.PlaybackViewModel
+import com.example.appmusicupn.ui.favoritos.PantallaFavoritos
 
 @Composable
 fun AppNavigation() {
@@ -26,6 +27,7 @@ fun AppNavigation() {
         composable("home") { PantallaHome(navController=navController, playbackViewModel = playbackViewModel) }
         composable("buscar") { PantallaBuscar(navController=navController, playbackViewModel = playbackViewModel) }
         composable("biblioteca") { PantallaBiblioteca(navController=navController, playbackViewModel = playbackViewModel) }
+        composable("favoritos") { PantallaFavoritos(navController=navController, playbackViewModel=playbackViewModel) }
         composable("configuracion_cuenta"){ PantallaConfiguracionCuenta(navController) }
     }
 }

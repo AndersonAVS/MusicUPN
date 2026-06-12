@@ -231,4 +231,29 @@ class FirebaseMusicRepository(
             RepositoryResult.Error("No se pudieron cargar tus favoritos")
         }
     }
+
+    override suspend fun eliminarFavorito(
+        favoritoId: String
+    ): RepositoryResult<Unit> {
+        val usuario = firebaseAuth.currentUser
+            ?: return RepositoryResult.Error("No hay una sesión activa")
+
+        if (favoritoId.isBlank()) {
+            return RepositoryResult.Error("Favorito inválido")
+        }
+
+        return try {
+            firestore
+                .collection("usuarios")
+                .document(usuario.uid)
+                .collection("favoritos")
+                .document(favoritoId)
+                .delete()
+                .await()
+
+            RepositoryResult.Success(Unit)
+        } catch (exception: Exception) {
+            RepositoryResult.Error("No se pudo quitar de favoritos")
+        }
+    }
 }

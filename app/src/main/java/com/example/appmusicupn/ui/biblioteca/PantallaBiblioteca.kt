@@ -169,28 +169,18 @@ fun PantallaBiblioteca(
                 color = Color.Gray
             )
         } else {
-            bibliotecaState.favoritos.forEach { favorito ->
+
                 BibliotecaItem(
-                    titulo = favorito.titulo,
-                    descripcion = favorito.artista,
+                    titulo = "Favoritos",
+                    descripcion = "Playlist • ${bibliotecaState.favoritos.size} canciones",
                     icono = "♥",
-                    color = Color(0xFF6D4C41),
+                    color = Color(0xFF5E6CE7),
                     onClick = {
-                        playbackViewModel.reproducirCancion(
-                            com.example.appmusicupn.data.model.Cancion(
-                                id = favorito.id,
-                                titulo = favorito.titulo,
-                                artista = favorito.artista,
-                                album = favorito.album,
-                                audioUrl = favorito.audioUrl,
-                                portadaUrl = favorito.portadaUrl,
-                                origen = favorito.origen
-                            )
-                        )
+                        navController.navigate("favoritos")
                     },
                     onMoreClick = {}
                 )
-            }
+
         }
 
         Spacer(modifier = Modifier.height(24.dp))

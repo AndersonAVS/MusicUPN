@@ -15,6 +15,8 @@ import com.example.appmusicupn.data.model.Favorito
 data class BibliotecaUiState(
     val playlists: List<Playlist> = emptyList(),
     val favoritos: List<Favorito> = emptyList(),
+    val busquedaFavoritos: String = "",
+    val ordenarFavoritosAscendente: Boolean = true,
     val nombreNuevaPlaylist: String = "",
     val error: String = "",
     val mensaje: String = "",
@@ -253,6 +255,42 @@ class BibliotecaViewModel(
                     uiState = uiState.copy(
                         cargando = false,
                         error = result.message
+                    )
+                }
+            }
+        }
+    }
+    fun onBusquedaFavoritosChange(value: String) {
+        uiState = uiState.copy(
+            busquedaFavoritos = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun alternarOrdenFavoritos() {
+        uiState = uiState.copy(
+            ordenarFavoritosAscendente = !uiState.ordenarFavoritosAscendente
+        )
+    }
+
+    fun eliminarFavorito(favoritoId: String) {
+        viewModelScope.launch {
+            when (val result = musicRepository.eliminarFavorito(favoritoId)) {
+                is RepositoryResult.Success -> {
+                    uiState = uiState.copy(
+                        favoritos = uiState.favoritos.filter { favorito ->
+                            favorito.id != favoritoId
+                        },
+                        mensaje = "Canción quitada de favoritos",
+                        error = ""
+                    )
+                }
+
+                is RepositoryResult.Error -> {
+                    uiState = uiState.copy(
+                        error = result.message,
+                        mensaje = ""
                     )
                 }
             }
