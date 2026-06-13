@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,17 +26,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.appmusicupn.data.model.Cancion
-import androidx.compose.material.icons.filled.Stop
 
 @Composable
 fun MiniPlayer(
     cancionActual: Cancion? = null,
     reproduciendo: Boolean = false,
     onPlayPauseClick: () -> Unit = {},
-    onStopClick: () -> Unit = {}
+    onStopClick: () -> Unit = {},
+    onNextClick: () -> Unit = {},
+    onPreviousClick: () -> Unit = {}
 ) {
-    val titulo = cancionActual?.titulo ?: "Tan solo tú"
-    val artista = cancionActual?.artista ?: "La Llave"
+    val titulo = cancionActual?.titulo ?: "Sin canción"
+    val artista = cancionActual?.artista ?: "Selecciona una canción"
 
     Row(
         modifier = Modifier
@@ -56,22 +59,24 @@ fun MiniPlayer(
             Text(
                 text = titulo,
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
             )
 
             Text(
                 text = artista,
-                color = Color.LightGray
+                color = Color.LightGray,
+                maxLines = 1
             )
         }
 
-        Icon(
-            Icons.Default.AddCircle,
-            contentDescription = null,
-            tint = Color.White
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
+        IconButton(onClick = onPreviousClick) {
+            Icon(
+                imageVector = Icons.Default.SkipPrevious,
+                contentDescription = "Anterior",
+                tint = Color.White
+            )
+        }
 
         IconButton(onClick = onStopClick) {
             Icon(
@@ -97,5 +102,12 @@ fun MiniPlayer(
             )
         }
 
+        IconButton(onClick = onNextClick) {
+            Icon(
+                imageVector = Icons.Default.SkipNext,
+                contentDescription = "Siguiente",
+                tint = Color.White
+            )
+        }
     }
 }

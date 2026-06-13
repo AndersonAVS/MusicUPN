@@ -50,6 +50,18 @@ fun PantallaFavoritos(
             }
         }
 
+    val cancionesFavoritas = favoritosFiltrados.map { favorito ->
+        Cancion(
+            id = favorito.id,
+            titulo = favorito.titulo,
+            artista = favorito.artista,
+            album = favorito.album,
+            audioUrl = favorito.audioUrl,
+            portadaUrl = favorito.portadaUrl,
+            origen = favorito.origen
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -198,21 +210,10 @@ fun PantallaFavoritos(
 
                     IconButton(
                         onClick = {
-                            val primerFavorito = bibliotecaState.favoritos.firstOrNull()
-
-                            if (primerFavorito != null) {
-                                playbackViewModel.reproducirCancion(
-                                    Cancion(
-                                        id = primerFavorito.id,
-                                        titulo = primerFavorito.titulo,
-                                        artista = primerFavorito.artista,
-                                        album = primerFavorito.album,
-                                        audioUrl = primerFavorito.audioUrl,
-                                        portadaUrl = primerFavorito.portadaUrl,
-                                        origen = primerFavorito.origen
-                                    )
-                                )
-                            }
+                            playbackViewModel.reproducirLista(
+                                canciones = cancionesFavoritas,
+                                indiceInicial = 0
+                            )
                         },
                         modifier = Modifier
                             .size(64.dp)
@@ -243,16 +244,13 @@ fun PantallaFavoritos(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                playbackViewModel.reproducirCancion(
-                                    Cancion(
-                                        id = favorito.id,
-                                        titulo = favorito.titulo,
-                                        artista = favorito.artista,
-                                        album = favorito.album,
-                                        audioUrl = favorito.audioUrl,
-                                        portadaUrl = favorito.portadaUrl,
-                                        origen = favorito.origen
-                                    )
+                                val indice = cancionesFavoritas.indexOfFirst { cancion ->
+                                    cancion.id == favorito.id
+                                }
+
+                                playbackViewModel.reproducirLista(
+                                    canciones = cancionesFavoritas,
+                                    indiceInicial = indice
                                 )
                             }
                             .padding(vertical = 10.dp),
@@ -305,7 +303,9 @@ fun PantallaFavoritos(
             cancionActual = playbackState.cancionActual,
             reproduciendo = playbackState.reproduciendo,
             onPlayPauseClick = playbackViewModel::alternarPlayPause,
-            onStopClick = playbackViewModel::detenerReproduccion
+            onStopClick = playbackViewModel::detenerReproduccion,
+            onNextClick = playbackViewModel::siguienteCancion,
+            onPreviousClick = playbackViewModel::cancionAnterior
         )
     }
 }

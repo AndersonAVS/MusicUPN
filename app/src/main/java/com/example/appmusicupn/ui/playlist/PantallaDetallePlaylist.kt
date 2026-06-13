@@ -230,11 +230,10 @@ fun PantallaDetallePlaylist(
 
                     IconButton(
                         onClick = {
-                            val primeraCancion = cancionesFiltradas.firstOrNull()
-
-                            if (primeraCancion != null) {
-                                playbackViewModel.reproducirCancion(primeraCancion)
-                            }
+                            playbackViewModel.reproducirLista(
+                                canciones = cancionesFiltradas,
+                                indiceInicial = 0
+                            )
                         },
                         modifier = Modifier
                             .size(64.dp)
@@ -282,7 +281,14 @@ fun PantallaDetallePlaylist(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                playbackViewModel.reproducirCancion(cancion)
+                                val indice = cancionesFiltradas.indexOfFirst { item ->
+                                    item.id == cancion.id
+                                }
+
+                                playbackViewModel.reproducirLista(
+                                    canciones = cancionesFiltradas,
+                                    indiceInicial = indice
+                                )
                             }
                             .padding(vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -334,7 +340,9 @@ fun PantallaDetallePlaylist(
             cancionActual = playbackState.cancionActual,
             reproduciendo = playbackState.reproduciendo,
             onPlayPauseClick = playbackViewModel::alternarPlayPause,
-            onStopClick = playbackViewModel::detenerReproduccion
+            onStopClick = playbackViewModel::detenerReproduccion,
+            onNextClick = playbackViewModel::siguienteCancion,
+            onPreviousClick = playbackViewModel::cancionAnterior
         )
     }
 }

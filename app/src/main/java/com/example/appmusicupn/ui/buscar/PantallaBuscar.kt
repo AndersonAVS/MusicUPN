@@ -257,7 +257,9 @@ fun PantallaBuscar(
             cancionActual = playbackState.cancionActual,
             reproduciendo = playbackState.reproduciendo,
             onPlayPauseClick = playbackViewModel::alternarPlayPause,
-            onStopClick = playbackViewModel::detenerReproduccion
+            onStopClick = playbackViewModel::detenerReproduccion,
+            onNextClick = playbackViewModel::siguienteCancion,
+            onPreviousClick = playbackViewModel::cancionAnterior
         )
 
         Spacer(modifier = Modifier.height(12.dp))
