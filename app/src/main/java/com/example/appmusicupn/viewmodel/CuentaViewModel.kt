@@ -1,31 +1,47 @@
 package com.example.appmusicupn.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import com.example.appmusicupn.data.model.UsuarioPerfil
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 data class CuentaUiState(
     val uid: String = "",
     val nombre: String = "",
     val correo: String = "",
+    val correoVerificado: Boolean = false,
     val fotoPerfil: String = "",
     val fechaRegistro: Long = 0L,
     val rol: String = "usuario",
     val error: String = "",
     val mensaje: String = "",
     val guardandoDatos: Boolean = false,
-    val subiendoFoto: Boolean = false
+    val subiendoFoto: Boolean = false,
+    val mostrarDialogCorreo: Boolean = false,
+    val mostrarDialogPassword: Boolean = false,
+    val mostrarDialogEliminarCuenta: Boolean = false,
+    val passwordActual: String = "",
+    val nuevoCorreo: String = "",
+    val nuevoPassword: String = "",
+    val confirmarNuevoPassword: String = "",
+    val actualizandoCorreo: Boolean = false,
+    val actualizandoPassword: Boolean = false,
+    val eliminandoCuenta: Boolean = false,
+    val cuentaEliminada: Boolean = false
 )
 
 class CuentaViewModel(
@@ -51,6 +67,8 @@ class CuentaViewModel(
 
         viewModelScope.launch {
             try {
+                usuario.reload().await()
+
                 val snapshot = firestore
                     .collection("usuarios")
                     .document(usuario.uid)
@@ -58,20 +76,36 @@ class CuentaViewModel(
                     .await()
 
                 val perfil = snapshot.toObject(UsuarioPerfil::class.java)
+                val correoAuth = usuario.email.orEmpty()
+                val correoPerfil = if (correoAuth.isNotBlank()) {
+                    correoAuth
+                } else {
+                    perfil?.correo.orEmpty()
+                }
 
                 uiState = uiState.copy(
                     uid = usuario.uid,
                     nombre = perfil?.nombre ?: usuario.displayName.orEmpty(),
-                    correo = perfil?.correo ?: usuario.email.orEmpty(),
+                    correo = correoPerfil,
+                    correoVerificado = usuario.isEmailVerified,
                     fotoPerfil = perfil?.fotoPerfil ?: usuario.photoUrl?.toString().orEmpty(),
                     fechaRegistro = perfil?.fechaRegistro ?: 0L,
                     rol = perfil?.rol ?: "usuario"
                 )
+
+                if (correoAuth.isNotBlank() && perfil?.correo != correoAuth) {
+                    firestore
+                        .collection("usuarios")
+                        .document(usuario.uid)
+                        .set(mapOf("correo" to correoAuth), SetOptions.merge())
+                        .await()
+                }
             } catch (exception: Exception) {
                 uiState = uiState.copy(
                     uid = usuario.uid,
                     nombre = usuario.displayName.orEmpty(),
                     correo = usuario.email.orEmpty(),
+                    correoVerificado = usuario.isEmailVerified,
                     error = "No se pudieron cargar los datos de la cuenta"
                 )
             }
@@ -85,8 +119,6 @@ class CuentaViewModel(
             mensaje = ""
         )
     }
-
-
 
     fun guardarCambios() {
         val nombreLimpio = uiState.nombre.trim()
@@ -117,9 +149,7 @@ class CuentaViewModel(
                     profileBuilder.setPhotoUri(Uri.parse(uiState.fotoPerfil.trim()))
                 }
 
-                val profileUpdates = profileBuilder.build()
-
-                usuario.updateProfile(profileUpdates).await()
+                usuario.updateProfile(profileBuilder.build()).await()
 
                 val perfilActualizado = UsuarioPerfil(
                     uid = usuario.uid,
@@ -143,21 +173,22 @@ class CuentaViewModel(
                 uiState = uiState.copy(
                     nombre = nombreLimpio,
                     correo = perfilActualizado.correo,
+                    correoVerificado = usuario.isEmailVerified,
                     fechaRegistro = perfilActualizado.fechaRegistro,
                     rol = perfilActualizado.rol,
-                    guardandoDatos  = false,
+                    guardandoDatos = false,
                     error = "",
                     mensaje = "Datos actualizados correctamente"
                 )
-
             } catch (exception: Exception) {
                 uiState = uiState.copy(
-                    guardandoDatos  = false,
+                    guardandoDatos = false,
                     error = "No se pudo actualizar la cuenta"
                 )
             }
         }
     }
+
     fun subirFotoPerfil(uri: Uri) {
         val usuario = firebaseAuth.currentUser
 
@@ -168,7 +199,7 @@ class CuentaViewModel(
 
         viewModelScope.launch {
             uiState = uiState.copy(
-                subiendoFoto  = true,
+                subiendoFoto = true,
                 error = "",
                 mensaje = ""
             )
@@ -192,21 +223,337 @@ class CuentaViewModel(
                 firestore
                     .collection("usuarios")
                     .document(usuario.uid)
-                    .update("fotoPerfil", fotoUrl)
+                    .set(mapOf("fotoPerfil" to fotoUrl), SetOptions.merge())
                     .await()
 
                 uiState = uiState.copy(
                     fotoPerfil = fotoUrl,
-                    subiendoFoto  = false,
+                    subiendoFoto = false,
                     mensaje = "Foto de perfil actualizada correctamente",
                     error = ""
                 )
             } catch (exception: Exception) {
                 uiState = uiState.copy(
-                    subiendoFoto  = false,
+                    subiendoFoto = false,
                     error = "No se pudo subir la foto de perfil"
                 )
             }
         }
+    }
+
+    fun abrirDialogCorreo() {
+        uiState = uiState.copy(
+            mostrarDialogCorreo = true,
+            nuevoCorreo = uiState.correo,
+            passwordActual = "",
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun cerrarDialogCorreo() {
+        uiState = uiState.copy(
+            mostrarDialogCorreo = false,
+            nuevoCorreo = "",
+            passwordActual = "",
+            actualizandoCorreo = false,
+            error = ""
+        )
+    }
+
+    fun abrirDialogPassword() {
+        uiState = uiState.copy(
+            mostrarDialogPassword = true,
+            passwordActual = "",
+            nuevoPassword = "",
+            confirmarNuevoPassword = "",
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun cerrarDialogPassword() {
+        uiState = uiState.copy(
+            mostrarDialogPassword = false,
+            passwordActual = "",
+            nuevoPassword = "",
+            confirmarNuevoPassword = "",
+            actualizandoPassword = false,
+            error = ""
+        )
+    }
+
+    fun abrirDialogEliminarCuenta() {
+        uiState = uiState.copy(
+            mostrarDialogEliminarCuenta = true,
+            passwordActual = "",
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun cerrarDialogEliminarCuenta() {
+        uiState = uiState.copy(
+            mostrarDialogEliminarCuenta = false,
+            passwordActual = "",
+            eliminandoCuenta = false,
+            error = ""
+        )
+    }
+
+    fun onPasswordActualChange(value: String) {
+        uiState = uiState.copy(
+            passwordActual = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun onNuevoCorreoChange(value: String) {
+        uiState = uiState.copy(
+            nuevoCorreo = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun onNuevoPasswordChange(value: String) {
+        uiState = uiState.copy(
+            nuevoPassword = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    fun onConfirmarNuevoPasswordChange(value: String) {
+        uiState = uiState.copy(
+            confirmarNuevoPassword = value,
+            error = "",
+            mensaje = ""
+        )
+    }
+
+    private suspend fun reautenticarUsuario(password: String) {
+        val usuario = firebaseAuth.currentUser
+            ?: throw IllegalStateException("No hay una sesión activa")
+
+        val correoActual = usuario.email
+            ?: throw IllegalStateException("No hay correo asociado a esta cuenta")
+
+        val credential = EmailAuthProvider.getCredential(
+            correoActual,
+            password
+        )
+
+        usuario.reauthenticate(credential).await()
+    }
+
+    fun actualizarCorreo() {
+        val usuario = firebaseAuth.currentUser
+
+        if (usuario == null) {
+            uiState = uiState.copy(error = "No hay una sesión activa")
+            return
+        }
+
+        val nuevoCorreoLimpio = uiState.nuevoCorreo.trim()
+        val password = uiState.passwordActual
+
+        if (nuevoCorreoLimpio.isBlank()) {
+            uiState = uiState.copy(error = "Ingresa el nuevo correo")
+            return
+        }
+
+        if (password.isBlank()) {
+            uiState = uiState.copy(error = "Ingresa tu contraseña actual")
+            return
+        }
+
+        if (nuevoCorreoLimpio.equals(uiState.correo.trim(), ignoreCase = true)) {
+            uiState = uiState.copy(error = "Ese ya es tu correo actual")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                actualizandoCorreo = true,
+                error = "",
+                mensaje = ""
+            )
+
+            try {
+                reautenticarUsuario(password)
+            } catch (exception: Exception) {
+                uiState = uiState.copy(
+                    actualizandoCorreo = false,
+                    error = "La contraseña actual es incorrecta"
+                )
+                return@launch
+            }
+
+            try {
+                usuario.verifyBeforeUpdateEmail(nuevoCorreoLimpio).await()
+
+                uiState = uiState.copy(
+                    nuevoCorreo = "",
+                    passwordActual = "",
+                    mostrarDialogCorreo = false,
+                    actualizandoCorreo = false,
+                    mensaje = "Te enviamos un correo de verificación para cambiar tu email",
+                    error = ""
+                )
+            } catch (exception: Exception) {
+                val mensajeError = when (exception) {
+                    is FirebaseAuthUserCollisionException -> {
+                        "Este correo ya está registrado en otra cuenta"
+                    }
+
+                    is FirebaseAuthInvalidCredentialsException -> {
+                        "El nuevo correo no tiene un formato válido"
+                    }
+
+                    is FirebaseAuthRecentLoginRequiredException -> {
+                        "Por seguridad, vuelve a iniciar sesión e intenta nuevamente"
+                    }
+
+                    else -> {
+                        exception.localizedMessage ?: "No se pudo enviar la verificación al nuevo correo"
+                    }
+                }
+
+                uiState = uiState.copy(
+                    actualizandoCorreo = false,
+                    error = mensajeError
+                )
+            }
+        }
+    }
+
+    fun actualizarPassword() {
+        val usuario = firebaseAuth.currentUser
+
+        if (usuario == null) {
+            uiState = uiState.copy(error = "No hay una sesión activa")
+            return
+        }
+
+        val passwordActual = uiState.passwordActual
+        val nuevoPassword = uiState.nuevoPassword
+        val confirmarNuevoPassword = uiState.confirmarNuevoPassword
+
+        if (passwordActual.isBlank()) {
+            uiState = uiState.copy(error = "Ingresa tu contraseña actual")
+            return
+        }
+
+        if (nuevoPassword.length < 6) {
+            uiState = uiState.copy(error = "La nueva contraseña debe tener al menos 6 caracteres")
+            return
+        }
+
+        if (nuevoPassword != confirmarNuevoPassword) {
+            uiState = uiState.copy(error = "Las contraseñas no coinciden")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                actualizandoPassword = true,
+                error = "",
+                mensaje = ""
+            )
+
+            try {
+                reautenticarUsuario(passwordActual)
+
+                usuario.updatePassword(nuevoPassword).await()
+
+                uiState = uiState.copy(
+                    passwordActual = "",
+                    nuevoPassword = "",
+                    confirmarNuevoPassword = "",
+                    mostrarDialogPassword = false,
+                    actualizandoPassword = false,
+                    mensaje = "Contraseña actualizada correctamente",
+                    error = ""
+                )
+            } catch (exception: Exception) {
+                uiState = uiState.copy(
+                    actualizandoPassword = false,
+                    error = "No se pudo actualizar la contraseña. Verifica tu contraseña actual"
+                )
+            }
+        }
+    }
+
+    fun eliminarCuenta() {
+        val usuario = firebaseAuth.currentUser
+
+        if (usuario == null) {
+            uiState = uiState.copy(error = "No hay una sesión activa")
+            return
+        }
+
+        val password = uiState.passwordActual
+
+        if (password.isBlank()) {
+            uiState = uiState.copy(error = "Ingresa tu contraseña actual")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                eliminandoCuenta = true,
+                error = "",
+                mensaje = ""
+            )
+
+            try {
+                reautenticarUsuario(password)
+            } catch (exception: Exception) {
+                uiState = uiState.copy(
+                    eliminandoCuenta = false,
+                    error = "La contraseña actual es incorrecta"
+                )
+                return@launch
+            }
+
+            try {
+                firestore
+                    .collection("usuarios")
+                    .document(usuario.uid)
+                    .delete()
+                    .await()
+
+                storage
+                    .reference
+                    .child("usuarios/${usuario.uid}/perfil/foto_perfil.jpg")
+                    .delete()
+                    .await()
+            } catch (exception: Exception) {
+                // Los datos secundarios no deben bloquear la eliminación de Auth.
+            }
+
+            try {
+                usuario.delete().await()
+
+                uiState = uiState.copy(
+                    mostrarDialogEliminarCuenta = false,
+                    eliminandoCuenta = false,
+                    cuentaEliminada = true,
+                    error = "",
+                    mensaje = "Cuenta eliminada correctamente"
+                )
+            } catch (exception: Exception) {
+                uiState = uiState.copy(
+                    eliminandoCuenta = false,
+                    error = "No se pudo eliminar la cuenta"
+                )
+            }
+        }
+    }
+
+    fun cerrarSesion() {
+        firebaseAuth.signOut()
     }
 }
