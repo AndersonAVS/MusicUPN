@@ -12,8 +12,8 @@ import kotlinx.coroutines.tasks.await
 import com.example.appmusicupn.data.model.UsuarioPerfil
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.auth.EmailAuthProvider
-import kotlinx.coroutines.tasks.await
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
 
 data class CuentaUiState(
     val uid: String = "",
@@ -24,12 +24,14 @@ data class CuentaUiState(
     val rol: String = "usuario",
     val error: String = "",
     val mensaje: String = "",
-    val guardando: Boolean = false
+    val guardandoDatos: Boolean = false,
+    val subiendoFoto: Boolean = false
 )
 
 class CuentaViewModel(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) : ViewModel() {
 
     var uiState by mutableStateOf(CuentaUiState())
@@ -61,7 +63,7 @@ class CuentaViewModel(
                     uid = usuario.uid,
                     nombre = perfil?.nombre ?: usuario.displayName.orEmpty(),
                     correo = perfil?.correo ?: usuario.email.orEmpty(),
-                    fotoPerfil = perfil?.fotoPerfil.orEmpty(),
+                    fotoPerfil = perfil?.fotoPerfil ?: usuario.photoUrl?.toString().orEmpty(),
                     fechaRegistro = perfil?.fechaRegistro ?: 0L,
                     rol = perfil?.rol ?: "usuario"
                 )
@@ -84,6 +86,8 @@ class CuentaViewModel(
         )
     }
 
+
+
     fun guardarCambios() {
         val nombreLimpio = uiState.nombre.trim()
 
@@ -96,15 +100,24 @@ class CuentaViewModel(
         }
 
         viewModelScope.launch {
-            uiState = uiState.copy(guardando = true, error = "", mensaje = "")
+            uiState = uiState.copy(
+                guardandoDatos = true,
+                error = "",
+                mensaje = ""
+            )
 
             try {
                 val usuario = firebaseAuth.currentUser
                     ?: throw IllegalStateException("No hay una sesión activa")
 
-                val profileUpdates = UserProfileChangeRequest.Builder()
+                val profileBuilder = UserProfileChangeRequest.Builder()
                     .setDisplayName(nombreLimpio)
-                    .build()
+
+                if (uiState.fotoPerfil.trim().isNotBlank()) {
+                    profileBuilder.setPhotoUri(Uri.parse(uiState.fotoPerfil.trim()))
+                }
+
+                val profileUpdates = profileBuilder.build()
 
                 usuario.updateProfile(profileUpdates).await()
 
@@ -112,7 +125,7 @@ class CuentaViewModel(
                     uid = usuario.uid,
                     nombre = nombreLimpio,
                     correo = usuario.email.orEmpty(),
-                    fotoPerfil = uiState.fotoPerfil,
+                    fotoPerfil = uiState.fotoPerfil.trim(),
                     fechaRegistro = if (uiState.fechaRegistro == 0L) {
                         System.currentTimeMillis()
                     } else {
@@ -132,15 +145,66 @@ class CuentaViewModel(
                     correo = perfilActualizado.correo,
                     fechaRegistro = perfilActualizado.fechaRegistro,
                     rol = perfilActualizado.rol,
-                    guardando = false,
+                    guardandoDatos  = false,
                     error = "",
                     mensaje = "Datos actualizados correctamente"
                 )
 
             } catch (exception: Exception) {
                 uiState = uiState.copy(
-                    guardando = false,
+                    guardandoDatos  = false,
                     error = "No se pudo actualizar la cuenta"
+                )
+            }
+        }
+    }
+    fun subirFotoPerfil(uri: Uri) {
+        val usuario = firebaseAuth.currentUser
+
+        if (usuario == null) {
+            uiState = uiState.copy(error = "No hay una sesión activa")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                subiendoFoto  = true,
+                error = "",
+                mensaje = ""
+            )
+
+            try {
+                val fotoRef = storage
+                    .reference
+                    .child("usuarios/${usuario.uid}/perfil/foto_perfil.jpg")
+
+                fotoRef.putFile(uri).await()
+
+                val fotoUrl = fotoRef.downloadUrl.await().toString()
+
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setDisplayName(uiState.nombre.trim())
+                    .setPhotoUri(Uri.parse(fotoUrl))
+                    .build()
+
+                usuario.updateProfile(profileUpdates).await()
+
+                firestore
+                    .collection("usuarios")
+                    .document(usuario.uid)
+                    .update("fotoPerfil", fotoUrl)
+                    .await()
+
+                uiState = uiState.copy(
+                    fotoPerfil = fotoUrl,
+                    subiendoFoto  = false,
+                    mensaje = "Foto de perfil actualizada correctamente",
+                    error = ""
+                )
+            } catch (exception: Exception) {
+                uiState = uiState.copy(
+                    subiendoFoto  = false,
+                    error = "No se pudo subir la foto de perfil"
                 )
             }
         }
